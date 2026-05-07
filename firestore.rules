@@ -50,6 +50,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Lessons content: any authenticated user can read lessons.
+    // Write/delete behavior remains unchanged (falls through to global deny).
+    match /lessons/{lessonId} {
+      allow read: if signedIn();
+    }
+
     // Lock down everything else.
     match /{document=**} {
       allow read, write: if false;

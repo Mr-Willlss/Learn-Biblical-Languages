@@ -231,7 +231,13 @@
   </style>
 </head>
 <body data-page="lessons">
-  <div id="auth-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;z-index:9999"><p style="color:white;font-size:1.2rem">Loading...</p></div>
+  <div id="auth-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;z-index:9999">
+    <div style="text-align:center;padding:16px;max-width:420px">
+      <p id="loader-main-msg" style="color:white;font-size:1.2rem;margin:0">Loading...</p>
+      <p id="loader-slow-msg" style="color:#cbd5e1;font-size:0.95rem;margin:12px 0 0 0;display:none">Loading is taking longer than expected...</p>
+      <button id="loader-retry-btn" type="button" style="display:none;margin-top:14px;padding:10px 16px;border-radius:12px;border:1px solid rgba(124,92,252,0.5);background:#7c5cfc;color:white;font-weight:700;cursor:pointer">Retry</button>
+    </div>
+  </div>
   <div id="app-content" style="display:none">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
@@ -420,6 +426,10 @@
 
     let auth = null;
     let db = null;
+    let pageSettled = false;
+    let loadHardTimeout = null;
+    let slowHintTimer = null;
+    let retryRevealTimer = null;
 
     function initFirebase() {
       if (!window.firebase) return false;
@@ -428,6 +438,51 @@
       auth = firebase.auth();
       db = firebase.firestore();
       return true;
+    }
+
+    function showLoadingSlowHint(){
+      const slow = document.getElementById('loader-slow-msg');
+      if (slow) slow.style.display = '';
+    }
+
+    function showLoadingRetry(){
+      const retry = document.getElementById('loader-retry-btn');
+      if (retry) retry.style.display = '';
+    }
+
+    function clearLoadingTimers(){
+      if (slowHintTimer) clearTimeout(slowHintTimer);
+      if (retryRevealTimer) clearTimeout(retryRevealTimer);
+      if (loadHardTimeout) clearTimeout(loadHardTimeout);
+      slowHintTimer = null;
+      retryRevealTimer = null;
+      loadHardTimeout = null;
+    }
+
+    function showLoadError(msg){
+      if (pageSettled) return;
+      pageSettled = true;
+      clearLoadingTimers();
+      const loader = document.getElementById('auth-loader');
+      const appContent = document.getElementById('app-content');
+      const main = document.getElementById('loader-main-msg');
+      const slow = document.getElementById('loader-slow-msg');
+      const retry = document.getElementById('loader-retry-btn');
+      if (loader) loader.style.display = 'flex';
+      if (appContent) appContent.style.display = 'none';
+      if (main) main.textContent = msg || "Could not load lessons. Please check your connection and try again.";
+      if (slow) slow.style.display = 'none';
+      if (retry) retry.style.display = '';
+    }
+
+    function markLoaded(){
+      if (pageSettled) return;
+      pageSettled = true;
+      clearLoadingTimers();
+      const loader = document.getElementById('auth-loader');
+      const appContent = document.getElementById('app-content');
+      if (loader) loader.style.display = 'none';
+      if (appContent) appContent.style.display = 'block';
     }
 
         function wireSignOut(user){
@@ -588,18 +643,27 @@
         const data = snap.exists ? (snap.data() || {}) : {};
         state.friendReqs = Array.isArray(data.friendRequests) ? data.friendRequests : [];
         render();
-      }, ()=>{});
+      }, (err)=>{
+        console.error(err);
+        showLoadError("Could not load lessons. Please check your connection and try again.");
+      });
 
       const col = db.collection('users').doc(user.uid).collection('notifications');
       col.where('read','==',false).onSnapshot((snap) => {
         const c = snap.size || 0;
         badge.textContent = String(c);
         badge.style.display = c ? '' : 'none';
-      }, ()=>{});
+      }, (err)=>{
+        console.error(err);
+        showLoadError("Could not load lessons. Please check your connection and try again.");
+      });
       col.orderBy('timestamp','desc').limit(30).onSnapshot((snap) => {
         state.notifs = snap.docs.map(d => ({ id:d.id, ...(d.data()||{}) }));
         render();
-      }, ()=>{});
+      }, (err)=>{
+        console.error(err);
+        showLoadError("Could not load lessons. Please check your connection and try again.");
+      });
 
       markAllBtn.addEventListener('click', async () => {
         try{
@@ -710,7 +774,11 @@
       else {
         try{
           const ref = db.collection('users').doc(user.uid);
-          const snap = await ref.get();
+          const snap = await ref.get().catch((err)=>{
+            console.error(err);
+            showLoadError("Could not load lessons. Please check your connection and try again.");
+            throw err;
+          });
           const data = snap.exists ? (snap.data() || {}) : {};
           setTopUser(user, data);
         }catch(_){
@@ -719,14 +787,40 @@
       }
 
       renderLessons({ completedLessons, unlockedLessons, currentLesson });
+      markLoaded();
     }
 
     (function boot(){
-      initFirebase();
-      document.addEventListener('authReady', function(e){
-        initPage(e.detail);
-      }, { once: true });
-      AuthGuard.start({ loginUrl: 'index.html' });
+      const retryBtn = document.getElementById('loader-retry-btn');
+      if (retryBtn) retryBtn.addEventListener('click', function(){ location.reload(); });
+
+      slowHintTimer = setTimeout(showLoadingSlowHint, 5000);
+      retryRevealTimer = setTimeout(showLoadingRetry, 10000);
+      loadHardTimeout = setTimeout(function(){
+        showLoadError("Could not load lessons. Please check your connection and try again.");
+      }, 8000);
+
+      const ok = initFirebase();
+      if (!ok || !auth || typeof auth.onAuthStateChanged !== 'function') {
+        initPage(null).catch(function(err){
+          console.error(err);
+          showLoadError("Could not load lessons. Please check your connection and try again.");
+        });
+        return;
+      }
+
+      auth.onAuthStateChanged(function(user){
+        initPage(user || null).catch(function(err){
+          console.error(err);
+          showLoadError("Could not load lessons. Please check your connection and try again.");
+        });
+      }, function(err){
+        console.error(err);
+        initPage(null).catch(function(e2){
+          console.error(e2);
+          showLoadError("Could not load lessons. Please check your connection and try again.");
+        });
+      });
     })();
   </script>
 </body>
