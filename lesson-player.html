@@ -164,6 +164,7 @@
     .opt:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04);box-shadow:0 14px 26px rgba(0,0,0,0.34)}
     .opt.good{border-color:rgba(34,197,94,0.55);background:rgba(34,197,94,0.10)}
     .opt.bad{border-color:rgba(239,68,68,0.65);background:rgba(239,68,68,0.10)}
+    .feedbackOk{margin-top:10px;color:var(--green);font-weight:900}
     .explain{margin-top:10px;color:var(--tm);font-size:12px;line-height:1.5}
     .builderArea{
       margin-top:10px;
@@ -369,6 +370,7 @@
         <div class="tbRight">
           <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
           <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="muteBtn" title="Toggle sound" type="button" aria-label="Toggle sound">🔊</button>
           <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
           <div style="display:flex;align-items:center;gap:10px">
             <div class="avatar" id="avatar"><span>👤</span></div>
@@ -763,6 +765,17 @@
 
     async function initLesson(user) {
       wireSignOut(user);
+      initMuteToggle();
+      if (!window.__startupUnlockBound) {
+        window.__startupUnlockBound = true;
+        const unlock = function() {
+          try { getAudioContext(); } catch(_) {}
+          window.removeEventListener('pointerdown', unlock, true);
+          window.removeEventListener('keydown', unlock, true);
+        };
+        window.addEventListener('pointerdown', unlock, true);
+        window.addEventListener('keydown', unlock, true);
+      }
 
       const lessonId = parseInt(qs('lesson') || '1', 10);
       if (!lessonId || !LESSON_DATA[lessonId]) {
@@ -816,6 +829,151 @@
             explanation: pick && pick.example ? pick.example : (ex.explanation || '')
           };
         });
+      }
+      function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, function(ch){
+          return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+        });
+      }
+      let audioCtx = null;
+      function getAudioContext() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        window.greekAudioCtx = audioCtx;
+        return audioCtx;
+      }
+      function isMuted(){ return localStorage.getItem('greekAppMuted') === 'true'; }
+      function playCorrectSound() {
+        if (isMuted()) return;
+        const ctx = getAudioContext();
+        const masterGain = ctx.createGain(); masterGain.gain.value = 0.55; masterGain.connect(ctx.destination);
+        [[523.25, 0.0, 0.20], [783.99, 0.18, 0.55]].forEach(([freq, start, dur]) => {
+          const osc = ctx.createOscillator(); const gain = ctx.createGain();
+          osc.type = 'sine'; osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, ctx.currentTime + start);
+          gain.gain.linearRampToValueAtTime(1, ctx.currentTime + start + 0.01);
+          gain.gain.setValueAtTime(1, ctx.currentTime + start + dur - 0.25);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + start + dur);
+          osc.connect(gain); gain.connect(masterGain); osc.start(ctx.currentTime + start); osc.stop(ctx.currentTime + start + dur + 0.05);
+        });
+        const shimmer = ctx.createOscillator(); const shimGain = ctx.createGain();
+        shimmer.type = 'sine'; shimmer.frequency.value = 1046.50;
+        shimGain.gain.setValueAtTime(0, ctx.currentTime + 0.18);
+        shimGain.gain.linearRampToValueAtTime(0.20, ctx.currentTime + 0.19);
+        shimGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.73);
+        shimmer.connect(shimGain); shimGain.connect(masterGain); shimmer.start(ctx.currentTime + 0.18); shimmer.stop(ctx.currentTime + 0.78);
+      }
+      function playWrongSound() {
+        if (isMuted()) return;
+        const ctx = getAudioContext();
+        const masterGain = ctx.createGain(); masterGain.gain.value = 0.40; masterGain.connect(ctx.destination);
+        [[311.13, 0.0, 0.22], [233.08, 0.20, 0.45]].forEach(([freq, start, dur]) => {
+          const osc = ctx.createOscillator(); const filter = ctx.createBiquadFilter(); const gain = ctx.createGain();
+          osc.type = 'sawtooth'; osc.frequency.value = freq;
+          filter.type = 'lowpass'; filter.frequency.value = 600; filter.Q.value = 1.5;
+          gain.gain.setValueAtTime(0, ctx.currentTime + start);
+          gain.gain.linearRampToValueAtTime(1, ctx.currentTime + start + 0.01);
+          gain.gain.setValueAtTime(1, ctx.currentTime + start + dur - 0.20);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + start + dur);
+          osc.connect(filter); filter.connect(gain); gain.connect(masterGain);
+          osc.start(ctx.currentTime + start); osc.stop(ctx.currentTime + start + dur + 0.05);
+        });
+      }
+      function pluckNote(ctx, masterGain, freq, startTime, duration, volume = 1.0, type = 'triangle') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + startTime + 0.01);
+        gain.gain.setValueAtTime(volume, ctx.currentTime + startTime + duration - 0.20);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + startTime + duration);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(ctx.currentTime + startTime);
+        osc.stop(ctx.currentTime + startTime + duration + 0.05);
+
+        const oscH = ctx.createOscillator();
+        const gainH = ctx.createGain();
+        oscH.type = 'sine';
+        oscH.frequency.value = freq * 2;
+        gainH.gain.setValueAtTime(0, ctx.currentTime + startTime);
+        gainH.gain.linearRampToValueAtTime(volume * 0.25, ctx.currentTime + startTime + 0.01);
+        gainH.gain.setValueAtTime(volume * 0.25, ctx.currentTime + startTime + duration - 0.20);
+        gainH.gain.linearRampToValueAtTime(0, ctx.currentTime + startTime + duration);
+        oscH.connect(gainH); gainH.connect(masterGain);
+        oscH.start(ctx.currentTime + startTime);
+        oscH.stop(ctx.currentTime + startTime + duration + 0.05);
+      }
+      function chordSwell(ctx, masterGain, freqs, startTime, duration, peakVolume = 0.8) {
+        freqs.forEach(freq => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+          gain.gain.linearRampToValueAtTime(peakVolume, ctx.currentTime + startTime + 0.15);
+          gain.gain.setValueAtTime(peakVolume, ctx.currentTime + startTime + duration - 0.55);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + startTime + duration);
+          osc.connect(gain); gain.connect(masterGain);
+          osc.start(ctx.currentTime + startTime);
+          osc.stop(ctx.currentTime + startTime + duration + 0.05);
+        });
+      }
+      function shimmerLayer(ctx, masterGain, freq, startTime, endTime, volume = 0.12) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + startTime + 0.1);
+        gain.gain.setValueAtTime(volume, ctx.currentTime + endTime - 0.5);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + endTime);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(ctx.currentTime + startTime);
+        osc.stop(ctx.currentTime + endTime + 0.05);
+      }
+      function withTremolo(ctx, destination, depth = 0.08, hz = 5.5) {
+        const tremGain = ctx.createGain();
+        tremGain.gain.value = 1 - depth;
+        tremGain.connect(destination);
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+        lfo.frequency.value = hz;
+        lfoGain.gain.value = depth;
+        lfo.connect(lfoGain);
+        lfoGain.connect(tremGain.gain);
+        lfo.start();
+        return { tremGain, lfo, lfoGain };
+      }
+      function playSectionCompleteSound() {
+        if (isMuted()) return;
+        const ctx = getAudioContext();
+        const master = ctx.createGain();
+        master.gain.value = 0.50;
+        const trem = withTremolo(ctx, ctx.destination, 0.08, 5.5);
+        master.connect(trem.tremGain);
+        pluckNote(ctx, master, 293.66, 0.00, 0.30);
+        pluckNote(ctx, master, 369.99, 0.18, 0.30);
+        pluckNote(ctx, master, 440.00, 0.36, 0.30);
+        chordSwell(ctx, master, [293.66, 369.99, 440.00], 0.60, 1.0, 0.80);
+        pluckNote(ctx, master, 440.00, 1.60, 0.25);
+        pluckNote(ctx, master, 493.88, 1.80, 0.25);
+        pluckNote(ctx, master, 587.33, 2.00, 0.80);
+        shimmerLayer(ctx, master, 880.00, 0.0, 2.8, 0.12);
+        setTimeout(() => { try { trem.lfo.stop(); } catch(_) {} }, 3200);
+      }
+      function initMuteToggle() {
+        const btn = document.getElementById('muteBtn');
+        if (!btn) return;
+        const paint = () => { btn.textContent = isMuted() ? '🔇' : '🔊'; };
+        paint();
+        btn.addEventListener('click', function() {
+          localStorage.setItem('greekAppMuted', isMuted() ? 'false' : 'true');
+          paint();
+        });
+      }
+      function withSpeak(text) {
+        return escapeHtml(String(text || '')).replace(/([Α-Ωα-ωάέήίόύώἀ-῾]+)/g, '<span class="gr">$1</span>');
       }
       document.title = `${lesson.title} • Learn Koine Greek`;
       document.getElementById('pageTitle').textContent = `Lesson ${lessonId}`;
@@ -885,7 +1043,7 @@
         updateHud();
         const theoryBody = isAlphabetLesson(lesson)
           ? buildAlphabetTheory(lesson)
-          : lesson.theory.replace(/([Α-Ωα-ωάέήίόύώἄἅἆἇἁἂἃἈἉἊἋἌἍἎἏὁἡτόῷῇῳἸἰῆῶἀἔὄὦ]+)/g,'<span class="gr">$1</span>');
+          : withSpeak(lesson.theory).replace(/\n/g,'<br>');
         const theoryHtml = `<div class="q">Objective: <span style="color:rgba(226,232,240,0.9)">${lesson.objective}</span></div>
           <div class="theory">${theoryBody}</div>
           <div class="btnRow">
@@ -893,7 +1051,10 @@
             <a class="btn" href="lessons.html">Back</a>
           </div>`;
         setCard(lesson.title, "Phase 1/3 • Theory", theoryHtml);
-        document.getElementById('gotItBtn').addEventListener('click', () => showExercise());
+        document.getElementById('gotItBtn').addEventListener('click', () => {
+          playSectionCompleteSound();
+          showExercise();
+        });
       }
 
       function showExercise() {
@@ -905,18 +1066,24 @@
         attemptsForCurrent = 0;
 
         if (ex.type === 'sentence_builder') {
-          const pool = shuffle(ex.words || []);
+          let pool = Array.isArray(ex.words) ? shuffle(ex.words.filter(Boolean)) : [];
+          if (!pool.length) {
+            const guessed = (String(ex.question || '').match(/[A-Za-zΑ-Ωα-ω]+/g) || [])
+              .filter(function(token){ return token.length <= 2; });
+            pool = shuffle([...new Set(guessed)]).slice(0, 6);
+          }
           const chosen = [];
           const body = `
-            <div class="q">${ex.question}</div>
+            <div class="q">${withSpeak(ex.question)}</div>
             <div class="builderArea" id="builderArea">${chosen.length ? '' : '<span style="color:var(--tm);font-size:12px">Tap words below to build your answer…</span>'}</div>
             <div class="pool" id="pool"></div>
             <div class="btnRow">
               <button class="btn btnPrimary" id="submitBtn" type="button">Submit</button>
-              <button class="btn btnPrimary" id="nextBtn" type="button" disabled>Continue →</button>
               <button class="btn" id="resetBtn" type="button">Reset</button>
+              <button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button>
             </div>
             <div class="explain" id="explain"></div>
+            <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
           `;
           setCard(`Exercise ${idx+1}/${exercises.length}`, "Phase 2/3 • Sentence Builder", body);
           const poolEl = document.getElementById('pool');
@@ -930,11 +1097,12 @@
               const c = document.createElement('button');
               c.className = 'chip gr';
               c.type = 'button';
-              c.textContent = w;
+              c.textContent = String(w);
               c.title = 'Tap to remove';
               c.addEventListener('click', () => { chosen.splice(i,1); renderBuilder(); renderPool(); });
               builderEl.appendChild(c);
             });
+            bindSpeakButtons(builderEl);
           }
           function renderPool() {
             poolEl.innerHTML = '';
@@ -943,16 +1111,21 @@
               const c = document.createElement('button');
               c.className = 'chip gr';
               c.type = 'button';
-              c.textContent = w;
+              c.textContent = String(w);
               c.disabled = chosen.length >= pool.length || (chosen.join(' ').split(' ').length >= pool.length);
               c.addEventListener('click', () => { chosen.push(w); renderBuilder(); });
               poolEl.appendChild(c);
             });
+            bindSpeakButtons(poolEl);
           }
           renderBuilder(); renderPool();
+          if (!pool.length) {
+            explainEl.textContent = 'No words were available for this exercise. Please retry the lesson.';
+          }
 
           document.getElementById('resetBtn').addEventListener('click', () => { chosen.length = 0; explainEl.textContent = ''; renderBuilder(); });
-          const nextBtn = document.getElementById('nextBtn');
+          const tryAgainBtn = document.getElementById('tryAgainBtn');
+          const feedbackOk = document.getElementById('feedbackOk');
           document.getElementById('submitBtn').addEventListener('click', () => {
             if (hearts <= 0) return;
             attemptsForCurrent++;
@@ -961,38 +1134,50 @@
               answeredCorrect++;
               if (attemptsForCurrent === 1) { correctFirstTry++; xpEarned += 5; flashXp(5); }
               else { xpEarned += 2.5; flashXp(2.5); }
+              playCorrectSound();
               markCard(true);
               explainEl.textContent = ex.explanation || '';
-              nextBtn.disabled = false;
+              feedbackOk.style.display = 'block';
+              setTimeout(() => { idx++; showExercise(); }, 1000);
             } else {
+              playWrongSound();
               loseHeart();
               markCard(false);
               explainEl.textContent = `Not quite. Correct answer: ${(ex.answer || []).join(' ')}. ${ex.explanation || ''}`.trim();
-              nextBtn.disabled = true;
+              tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
           });
-          nextBtn.addEventListener('click', () => { idx++; showExercise(); });
+          tryAgainBtn.addEventListener('click', () => {
+            chosen.length = 0;
+            explainEl.textContent = '';
+            tryAgainBtn.style.display = 'none';
+            renderBuilder();
+            renderPool();
+          });
           return;
         }
 
         const isTranslate = ex.type === 'translate_to_english';
-        const prompt = isTranslate ? `<span class="gr">${ex.question}</span>` : ex.question;
+        const prompt = withSpeak(ex.question);
         const body = `
           <div class="q">${prompt}</div>
           <div class="opts" id="opts"></div>
-          <div class="btnRow"><button class="btn btnPrimary" id="nextBtn" type="button" disabled>Continue →</button></div>
+          <div class="btnRow"><button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button></div>
           <div class="explain" id="explain"></div>
+          <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
         `;
         setCard(`Exercise ${idx+1}/${exercises.length}`, `Phase 2/3 • ${isTranslate ? 'Translate' : 'Multiple Choice'}`, body);
         const optsEl = document.getElementById('opts');
         const explainEl = document.getElementById('explain');
-        const nextBtn = document.getElementById('nextBtn');
+        const tryAgainBtn = document.getElementById('tryAgainBtn');
+        const feedbackOk = document.getElementById('feedbackOk');
         (ex.options || []).forEach((opt) => {
           const b = document.createElement('button');
           b.className = 'opt';
           b.type = 'button';
-          b.textContent = opt;
+          b.dataset.opt = opt;
+          b.innerHTML = withSpeak(opt);
           b.addEventListener('click', () => {
             if (hearts <= 0) return;
             attemptsForCurrent++;
@@ -1002,27 +1187,28 @@
               answeredCorrect++;
               if (attemptsForCurrent === 1) { correctFirstTry++; xpEarned += 5; flashXp(5); }
               else { xpEarned += 2.5; flashXp(2.5); }
+              playCorrectSound();
               b.classList.add('good');
               markCard(true);
               explainEl.textContent = ex.explanation || '';
-              nextBtn.disabled = false;
+              feedbackOk.style.display = 'block';
+              setTimeout(() => { idx++; showExercise(); }, 1000);
             } else {
+              playWrongSound();
               b.classList.add('bad');
               loseHeart();
               markCard(false);
-              [...optsEl.children].forEach(ch => { if (ch.textContent === ex.answer) ch.classList.add('good'); });
+              [...optsEl.children].forEach(ch => {
+                if ((ch.dataset.opt || '') === ex.answer) ch.classList.add('good');
+              });
               explainEl.textContent = `Incorrect. Correct answer: ${ex.answer}. ${ex.explanation || ''}`.trim();
-              nextBtn.disabled = true;
-              setTimeout(() => {
-                [...optsEl.children].forEach(ch => ch.classList.remove('good','bad'));
-                [...optsEl.children].forEach(ch => ch.disabled = false);
-              }, 800);
+              tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
           });
           optsEl.appendChild(b);
         });
-        nextBtn.addEventListener('click', () => { idx++; showExercise(); });
+        tryAgainBtn.addEventListener('click', () => { showExercise(); });
       }
 
       async function showComplete() {
