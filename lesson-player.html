@@ -772,6 +772,51 @@
 
       const inRoom = !!qs('room');
       const lesson = LESSON_DATA[lessonId];
+      const ALPHABET_LETTERS = {
+        1: [
+          ["Α","α","Alpha","father"],["Β","β","Beta","ball"],["Γ","γ","Gamma","get"],["Δ","δ","Delta","dog"],
+          ["Ε","ε","Epsilon","met"],["Ζ","ζ","Zeta","zebra"],["Η","η","Eta","they"],["Θ","θ","Theta","think"],
+          ["Ι","ι","Iota","machine"],["Κ","κ","Kappa","kite"],["Λ","λ","Lambda","lamp"],["Μ","μ","Mu","man"]
+        ],
+        2: [
+          ["Ν","ν","Nu","no"],["Ξ","ξ","Xi","ax"],["Ο","ο","Omicron","off"],["Π","π","Pi","pen"],
+          ["Ρ","ρ","Rho","run"],["Σ","σ/ς","Sigma","sun"],["Τ","τ","Tau","top"],["Υ","υ","Upsilon","French 'u'"],
+          ["Φ","φ","Phi","phone"],["Χ","χ","Chi","Bach"],["Ψ","ψ","Psi","lapse"],["Ω","ω","Omega","told"]
+        ]
+      };
+      function isAlphabetLesson(lsn){ return lsn && (lsn.id === 1 || lsn.id === 2); }
+      function buildAlphabetTheory(lsn) {
+        return (ALPHABET_LETTERS[lsn.id] || []).map(function(r){
+          return `<div class="gr">${r[0]} ${r[1]} — ${r[2]} — sounds like the '${(r[3]||'').charAt(0)}' in "${r[3]}"</div>`;
+        }).join('');
+      }
+      function normalizeExercisesForLesson(lsn) {
+        const source = Array.isArray(lsn.exercises) ? lsn.exercises : [];
+        return source.map(function(ex){
+          if (ex.type !== 'sentence_builder') return ex;
+          if (isAlphabetLesson(lsn)) {
+            const letters = (ALPHABET_LETTERS[lsn.id] || []).map(function(r){ return r[0]; });
+            const sample = shuffle(letters).slice(0,4);
+            const sorted = [...sample].sort(function(a,b){ return letters.indexOf(a) - letters.indexOf(b); });
+            return {
+              type: 'sentence_builder',
+              question: `Arrange these letters in alphabetical order: ${sample.join(', ')}`,
+              words: sample,
+              answer: sorted,
+              explanation: `Correct order: ${sorted.join(' → ')}`
+            };
+          }
+          const vocab = (lsn.vocabulary || []).slice(0,4);
+          const pick = vocab[0];
+          return {
+            type: 'translate_to_english',
+            question: `What does ${pick ? pick.greek : 'this word'} mean?`,
+            options: shuffle(vocab.map(function(v){ return v.english; })).slice(0,4),
+            answer: pick ? pick.english : '',
+            explanation: pick && pick.example ? pick.example : (ex.explanation || '')
+          };
+        });
+      }
       document.title = `${lesson.title} • Learn Koine Greek`;
       document.getElementById('pageTitle').textContent = `Lesson ${lessonId}`;
       document.getElementById('pageSub').textContent = lesson.title;
@@ -801,17 +846,18 @@
       // Lesson state
       let hearts = clamp(Number.isFinite(userData.hearts) ? userData.hearts : 5, 0, 5);
       let xpEarned = 0;
-      let correct = 0;
-      let answered = 0;
+      let correctFirstTry = 0;
+      let answeredCorrect = 0;
+      let attemptsForCurrent = 0;
       let phase = 'theory';
-      const exercises = shuffle(lesson.exercises || []);
+      const exercises = shuffle(normalizeExercisesForLesson(lesson));
       let idx = 0;
       const totalSteps = 1 + exercises.length + 1;
 
       function updateHud() {
         document.getElementById('xpEarned').textContent = String(xpEarned);
         renderHearts(hearts);
-        const done = (phase === 'theory' ? 0 : 1) + answered + (phase === 'complete' ? 1 : 0);
+        const done = (phase === 'theory' ? 0 : 1) + answeredCorrect + (phase === 'complete' ? 1 : 0);
         setProgress(done, totalSteps);
       }
 
@@ -837,8 +883,11 @@
       function showTheory() {
         phase = 'theory';
         updateHud();
+        const theoryBody = isAlphabetLesson(lesson)
+          ? buildAlphabetTheory(lesson)
+          : lesson.theory.replace(/([Α-Ωα-ωάέήίόύώἄἅἆἇἁἂἃἈἉἊἋἌἍἎἏὁἡτόῷῇῳἸἰῆῶἀἔὄὦ]+)/g,'<span class="gr">$1</span>');
         const theoryHtml = `<div class="q">Objective: <span style="color:rgba(226,232,240,0.9)">${lesson.objective}</span></div>
-          <div class="theory">${lesson.theory.replace(/([Α-Ωα-ωάέήίόύώἄἅἆἇἁἂἃἈἉἊἋἌἍἎἏὁἡτόῷῇῳἸἰῆῶἀἔὄὦ]+)/g,'<span class="gr">$1</span>')}</div>
+          <div class="theory">${theoryBody}</div>
           <div class="btnRow">
             <button class="btn btnPrimary" id="gotItBtn" type="button">Got it! →</button>
             <a class="btn" href="lessons.html">Back</a>
@@ -853,6 +902,7 @@
         phase = 'exercise';
         updateHud();
         const ex = exercises[idx];
+        attemptsForCurrent = 0;
 
         if (ex.type === 'sentence_builder') {
           const pool = shuffle(ex.words || []);
@@ -863,6 +913,7 @@
             <div class="pool" id="pool"></div>
             <div class="btnRow">
               <button class="btn btnPrimary" id="submitBtn" type="button">Submit</button>
+              <button class="btn btnPrimary" id="nextBtn" type="button" disabled>Continue →</button>
               <button class="btn" id="resetBtn" type="button">Reset</button>
             </div>
             <div class="explain" id="explain"></div>
@@ -901,16 +952,27 @@
           renderBuilder(); renderPool();
 
           document.getElementById('resetBtn').addEventListener('click', () => { chosen.length = 0; explainEl.textContent = ''; renderBuilder(); });
+          const nextBtn = document.getElementById('nextBtn');
           document.getElementById('submitBtn').addEventListener('click', () => {
             if (hearts <= 0) return;
+            attemptsForCurrent++;
             const ok = JSON.stringify(chosen) === JSON.stringify(ex.answer || []);
-            answered++;
-            if (ok) { correct++; xpEarned += 5; flashXp(5); markCard(true); }
-            else { loseHeart(); markCard(false); }
-            explainEl.textContent = ex.explanation || '';
+            if (ok) {
+              answeredCorrect++;
+              if (attemptsForCurrent === 1) { correctFirstTry++; xpEarned += 5; flashXp(5); }
+              else { xpEarned += 2.5; flashXp(2.5); }
+              markCard(true);
+              explainEl.textContent = ex.explanation || '';
+              nextBtn.disabled = false;
+            } else {
+              loseHeart();
+              markCard(false);
+              explainEl.textContent = `Not quite. Correct answer: ${(ex.answer || []).join(' ')}. ${ex.explanation || ''}`.trim();
+              nextBtn.disabled = true;
+            }
             updateHud();
-            setTimeout(() => { idx++; showExercise(); }, 900);
           });
+          nextBtn.addEventListener('click', () => { idx++; showExercise(); });
           return;
         }
 
@@ -919,11 +981,13 @@
         const body = `
           <div class="q">${prompt}</div>
           <div class="opts" id="opts"></div>
+          <div class="btnRow"><button class="btn btnPrimary" id="nextBtn" type="button" disabled>Continue →</button></div>
           <div class="explain" id="explain"></div>
         `;
         setCard(`Exercise ${idx+1}/${exercises.length}`, `Phase 2/3 • ${isTranslate ? 'Translate' : 'Multiple Choice'}`, body);
         const optsEl = document.getElementById('opts');
         const explainEl = document.getElementById('explain');
+        const nextBtn = document.getElementById('nextBtn');
         (ex.options || []).forEach((opt) => {
           const b = document.createElement('button');
           b.className = 'opt';
@@ -931,32 +995,39 @@
           b.textContent = opt;
           b.addEventListener('click', () => {
             if (hearts <= 0) return;
+            attemptsForCurrent++;
             disableOptions();
             const ok = opt === ex.answer;
-            answered++;
             if (ok) {
-              correct++;
-              xpEarned += 5;
+              answeredCorrect++;
+              if (attemptsForCurrent === 1) { correctFirstTry++; xpEarned += 5; flashXp(5); }
+              else { xpEarned += 2.5; flashXp(2.5); }
               b.classList.add('good');
-              flashXp(5);
               markCard(true);
+              explainEl.textContent = ex.explanation || '';
+              nextBtn.disabled = false;
             } else {
               b.classList.add('bad');
               loseHeart();
               markCard(false);
               [...optsEl.children].forEach(ch => { if (ch.textContent === ex.answer) ch.classList.add('good'); });
+              explainEl.textContent = `Incorrect. Correct answer: ${ex.answer}. ${ex.explanation || ''}`.trim();
+              nextBtn.disabled = true;
+              setTimeout(() => {
+                [...optsEl.children].forEach(ch => ch.classList.remove('good','bad'));
+                [...optsEl.children].forEach(ch => ch.disabled = false);
+              }, 800);
             }
-            explainEl.textContent = ex.explanation || '';
             updateHud();
-            setTimeout(() => { idx++; showExercise(); }, 900);
           });
           optsEl.appendChild(b);
         });
+        nextBtn.addEventListener('click', () => { idx++; showExercise(); });
       }
 
       async function showComplete() {
         phase = 'complete';
-        const accuracy = exercises.length ? Math.round((correct/exercises.length)*100) : 0;
+        const accuracy = exercises.length ? Math.round((correctFirstTry/exercises.length)*100) : 0;
         const baseReward = Number.isFinite(lesson.xpReward) ? lesson.xpReward : 0;
         const lessonXp = baseReward + xpEarned;
         const multiplier = inRoom ? 1.1 : 1.0;
@@ -997,9 +1068,9 @@
           </div>
         `;
         setCard("Lesson Complete! 🎉", "Phase 3/3 • Summary", body);
-        document.getElementById('reviewBtn').addEventListener('click', () => { idx = 0; answered = 0; correct = 0; xpEarned = 0; showTheory(); });
+        document.getElementById('reviewBtn').addEventListener('click', () => { idx = 0; answeredCorrect = 0; correctFirstTry = 0; xpEarned = 0; showTheory(); });
         const rb = document.getElementById('retryBtn');
-        if (rb) rb.addEventListener('click', () => { idx = 0; answered = 0; correct = 0; xpEarned = 0; showTheory(); });
+        if (rb) rb.addEventListener('click', () => { idx = 0; answeredCorrect = 0; correctFirstTry = 0; xpEarned = 0; showTheory(); });
 
         if (!user) {
           showModal("Save your progress?", "You finished a lesson as a guest. Sign in with Google to save XP, streaks, and friends.", [
