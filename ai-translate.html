@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Translate • Learn Koine Greek</title>
+  <style>
+    body{margin:0;background:#0f1117;color:#e2e8f0;font-family:'Segoe UI',system-ui}
+    .wrap{max-width:900px;margin:30px auto;padding:16px}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:#181c27;padding:16px}
+    textarea{width:100%;min-height:120px;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px}
+    button{margin-top:10px;background:#7c5cfc;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700}
+    .res{margin-top:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;background:#101521;white-space:pre-wrap}
+    a{color:#93c5fd}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AI Translate</h1>
+    <p><a href="dashboard.html">← Back to Dashboard</a></p>
+    <div class="card">
+      <textarea id="greek-input" placeholder="Type Koine Greek word or sentence..."></textarea>
+      <button id="translate-btn" type="button">Translate & Analyse</button>
+      <h3>TRANSLATION</h3><div class="res" id="result-translation"></div>
+      <h3>WORD BREAKDOWN</h3><div class="res" id="result-breakdown"></div>
+      <h3>GRAMMAR</h3><div class="res" id="result-grammar"></div>
+      <h3>NT EXAMPLE</h3><div class="res" id="result-nt"></div>
+    </div>
+  </div>
+  <script src="gemini.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

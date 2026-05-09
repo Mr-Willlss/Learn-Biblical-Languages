@@ -1008,9 +1008,21 @@
       let answeredCorrect = 0;
       let attemptsForCurrent = 0;
       let phase = 'theory';
-      const exercises = shuffle(normalizeExercisesForLesson(lesson));
+      let exercises = shuffle(normalizeExercisesForLesson(lesson));
       let idx = 0;
-      const totalSteps = 1 + exercises.length + 1;
+      let totalSteps = 1 + exercises.length + 1;
+
+      window.loadDynamicExercises = function(newExercises) {
+        if (!Array.isArray(newExercises) || !newExercises.length) return;
+        exercises = shuffle(newExercises);
+        totalSteps = 1 + exercises.length + 1;
+        idx = 0;
+        answeredCorrect = 0;
+        correctFirstTry = 0;
+        xpEarned = 0;
+        phase = 'exercise';
+        showExercise();
+      };
 
       function updateHud() {
         document.getElementById('xpEarned').textContent = String(xpEarned);
@@ -1083,6 +1095,7 @@
               <button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button>
             </div>
             <div class="explain" id="explain"></div>
+            <div class="ai-explain" id="ai-explanation"></div>
             <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
           `;
           setCard(`Exercise ${idx+1}/${exercises.length}`, "Phase 2/3 • Sentence Builder", body);
@@ -1144,6 +1157,7 @@
               loseHeart();
               markCard(false);
               explainEl.textContent = `Not quite. Correct answer: ${(ex.answer || []).join(' ')}. ${ex.explanation || ''}`.trim();
+              if (window.triggerWrongExplanation) window.triggerWrongExplanation(ex.question || '', chosen.join(' '), (ex.answer || []).join(' '));
               tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
@@ -1165,6 +1179,7 @@
           <div class="opts" id="opts"></div>
           <div class="btnRow"><button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button></div>
           <div class="explain" id="explain"></div>
+          <div class="ai-explain" id="ai-explanation"></div>
           <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
         `;
         setCard(`Exercise ${idx+1}/${exercises.length}`, `Phase 2/3 • ${isTranslate ? 'Translate' : 'Multiple Choice'}`, body);
@@ -1202,6 +1217,7 @@
                 if ((ch.dataset.opt || '') === ex.answer) ch.classList.add('good');
               });
               explainEl.textContent = `Incorrect. Correct answer: ${ex.answer}. ${ex.explanation || ''}`.trim();
+              if (window.triggerWrongExplanation) window.triggerWrongExplanation(ex.question || '', opt, ex.answer || '');
               tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
@@ -1249,6 +1265,7 @@
           ${passed ? `` : `<div style="margin-top:12px;border:1px solid rgba(249,115,22,0.28);background:rgba(249,115,22,0.10);border-radius:16px;padding:10px;color:rgba(226,232,240,0.92)"><b style="color:var(--tw)">60% required to unlock the next lesson.</b> You scored <b style="color:var(--tw)">${accuracy}%</b>. Review and retry to progress.</div>`}
           <div class="btnRow">
             ${passed ? `<a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>` : `<button class="btn btnPrimary" id="retryBtn" type="button">Retry lesson →</button>`}
+            <button class="btn btnPrimary" id="generate-exercises-btn" data-topic="${String(lesson.title).replace(/\"/g,'&quot;')}" data-vocab='${JSON.stringify((lesson.vocabulary||[]).map(v=>v.greek)).replace(/'/g,'&#39;')}'>Generate More Practice</button>
             <button class="btn" id="reviewBtn" type="button">Review lesson</button>
             <a class="btn" href="lessons.html">Back to map</a>
           </div>
@@ -1376,5 +1393,7 @@
       AuthGuard.start({ loginUrl: 'index.html' });
     })();
   </script>
+  <script src="gemini.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
