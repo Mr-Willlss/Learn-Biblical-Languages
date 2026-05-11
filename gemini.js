@@ -1,8 +1,5 @@
 (function () {
-  const PROXY_URL = window.GEMINI_PROXY_URL ||
-    ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-      ? 'http://localhost:3001/api/gemini'
-      : '/api/gemini');
+  const PROXY_URL = window.GEMINI_PROXY_URL || '/.netlify/functions/gemini';
 
   async function callGemini(prompt, systemPrompt = '') {
     try {

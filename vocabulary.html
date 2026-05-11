@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Vocabulary • Learn Koine Greek</title>
-  <script src="progress.js"></script>
+  <script src="progress-manager.js"></script>
   <script src="game-data.js"></script>
   <style>
     :root{
@@ -421,6 +421,9 @@
       if (user) {
         const snap = await db.collection('users').doc(user.uid).get();
         state.userData = snap.exists ? (snap.data() || {}) : {};
+        if (window.syncFromFirebase) {
+          try { await syncFromFirebase(user.uid); } catch(_) {}
+        }
         // Signed-in users still use localStorage progress for unlocking (consistent across pages).
         const favArr = Array.isArray(state.userData.favorites) ? state.userData.favorites : [];
         state.favorites = new Set(favArr);
@@ -430,9 +433,9 @@
         state.favorites = new Set(JSON.parse(sessionStorage.getItem('gk_fav') || '[]'));
       }
 
-      const prog = (window.Progress && Progress.getProgress) ? Progress.getProgress() : {};
+      const prog = (window.Progress && Progress.getProgress) ? Progress.getProgress() : { completedLessons: [] };
       state.unlockedLessons = (window.Progress && Progress.getUnlockedLessons) ? Progress.getUnlockedLessons() : [1];
-      state.completedLessons = Object.keys(prog).map(k => Number(k)).filter(n => Number.isFinite(n) && prog[String(n)] && prog[String(n)].completed).sort((a,b)=>a-b);
+      state.completedLessons = Array.isArray(prog.completedLessons) ? prog.completedLessons.slice().sort((a,b)=>a-b) : [];
       const maxUnlocked = state.unlockedLessons.length ? Math.max(...state.unlockedLessons) : 1;
 
       let LESSON_DATA = null;

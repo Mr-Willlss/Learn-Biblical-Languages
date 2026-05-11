@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Lesson • Learn Koine Greek</title>
-  <script src="progress.js"></script>
+  <script src="progress-manager.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -981,19 +981,23 @@
 
       let userData = { hearts:5, heartsUpdatedAt:Date.now(), xp:0, streak:0, lessonsCompleted:0, currentLesson:1, achievements:{} };
       let userRef = null;
+      let localProgress = window.getProgress ? getProgress() : { completedLessons: [], currentLesson: 1 };
 
       if (user) {
         userRef = db.collection('users').doc(user.uid);
         const snap = await userRef.get();
         userData = snap.exists ? (snap.data() || userData) : userData;
+        if (window.syncFromFirebase) {
+          try { localProgress = await syncFromFirebase(user.uid); } catch(_) {}
+        }
         userData.hearts = await regenHeartsIfNeeded(userRef, userData);
         setTopUser(user, userData);
       } else {
         setTopUser(null, userData);
       }
 
-      const currentLesson = Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1;
-      const lessonsCompleted = Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0;
+      const currentLesson = Number.isFinite(localProgress.currentLesson) ? localProgress.currentLesson : (Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1);
+      const lessonsCompleted = Array.isArray(localProgress.completedLessons) ? localProgress.completedLessons.length : (Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0);
       const alreadyCompleted = lessonId <= lessonsCompleted;
       const locked = lessonId > currentLesson && !alreadyCompleted;
       if (locked) {

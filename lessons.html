@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Lessons • Learn Koine Greek</title>
-  <script src="progress.js"></script>
+  <script src="progress-manager.js"></script>
   <script src="game-data.js"></script>
   <style>
     :root{
@@ -700,13 +700,12 @@
       // World cards
       WORLDS.forEach(w => {
         const [start,end] = w.range;
-        const total = end - start + 1;
-        const done = completed.filter(x => x>=start && x<=end).length;
-        const prevRange = w.n === 1 ? null : WORLDS.find(x => x.n === w.n - 1).range;
-        const prevTotal = prevRange ? (prevRange[1] - prevRange[0] + 1) : 0;
-        const prevDone = prevRange ? completed.filter(x => x>=prevRange[0] && x<=prevRange[1]).length : prevTotal;
-        const worldUnlocked = (w.n === 1) || (prevDone >= prevTotal);
-        const status = done >= total ? "COMPLETED" : (worldUnlocked ? ((currentLesson>=start && currentLesson<=end) ? "ACTIVE" : "UNLOCKED") : "LOCKED");
+        const totals = (window.getWorldProgressCount ? getWorldProgressCount(w.n) : { done: completed.filter(x => x>=start && x<=end).length, total: (end - start + 1) });
+        const done = totals.done;
+        const total = totals.total;
+        const statusKey = window.getWorldStatus ? getWorldStatus(w.n) : (done >= total ? 'completed' : 'active');
+        const worldUnlocked = statusKey !== 'locked';
+        const status = statusKey === 'completed' ? 'COMPLETED' : (statusKey === 'active' ? 'ACTIVE' : 'LOCKED');
 
         const nextLessonInWorld = clamp(Math.max(start, Math.min(end, currentLesson)), start, end);
         const btnLabel = status === "LOCKED" ? "Locked" : (status === "COMPLETED" ? "Review World" : (status === "ACTIVE" ? "Continue" : "Start World"));
@@ -760,15 +759,13 @@
       wireSignOut(user);
       if (user && db) setupNotificationCenter(user);
 
-      const unlockedLessons = (window.Progress && Progress.getUnlockedLessons) ? Progress.getUnlockedLessons() : [1];
-      const prog = (window.Progress && Progress.getProgress) ? Progress.getProgress() : {};
-      const completedLessons = Object.keys(prog).map(k => Number(k)).filter(n => Number.isFinite(n) && prog[String(n)] && prog[String(n)].completed).sort((a,b)=>a-b);
-      let currentLesson = 1;
-      for (let i = 1; i <= 24; i++) {
-        const row = prog[String(i)];
-        if (unlockedLessons.includes(i) && !(row && row.completed)) { currentLesson = i; break; }
-        if (i === 24) currentLesson = 24;
+      let progress = (window.getProgress ? getProgress() : { completedLessons:[], currentLesson:1 });
+      if (user && window.syncFromFirebase) {
+        try { progress = await syncFromFirebase(user.uid); } catch(_) {}
       }
+      const unlockedLessons = (window.getUnlockedLessons ? getUnlockedLessons() : [1]);
+      const completedLessons = Array.isArray(progress.completedLessons) ? progress.completedLessons.slice() : [];
+      const currentLesson = Number.isFinite(progress.currentLesson) ? progress.currentLesson : (window.getNextLesson ? (getNextLesson() || 1) : 1);
 
       if (!user) setTopUser(null, { hearts:5, streak:0, xp: (window.getTotalXP ? getTotalXP() : 0) });
       else {

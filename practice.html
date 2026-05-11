@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Practice • Learn Koine Greek</title>
-  <script src="progress.js"></script>
+  <script src="progress-manager.js"></script>
   <script src="game-data.js"></script>
   <style>
     :root{
@@ -706,9 +706,18 @@
       if (user) {
         const snap = await db.collection('users').doc(user.uid).get();
         state.userData = snap.exists ? (snap.data() || {}) : {};
-        state.lessonsCompleted = Number.isFinite(state.userData.lessonsCompleted) ? state.userData.lessonsCompleted : 0;
+        if (window.syncFromFirebase) {
+          try {
+            const p = await syncFromFirebase(user.uid);
+            state.lessonsCompleted = Array.isArray(p.completedLessons) ? p.completedLessons.length : 0;
+          } catch(_) {}
+        }
+        if (!state.lessonsCompleted) {
+          state.lessonsCompleted = Number.isFinite(state.userData.lessonsCompleted) ? state.userData.lessonsCompleted : ((window.getProgress ? (getProgress().completedLessons || []).length : 0));
+        }
         setTopUser(user, state.userData);
       } else {
+        state.lessonsCompleted = window.getProgress ? ((getProgress().completedLessons || []).length) : 0;
         setTopUser(null, { hearts:5, streak:0 });
       }
 

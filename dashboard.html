@@ -16,6 +16,7 @@ Top 5 research findings applied (2024–2025):
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Dashboard • Learn Koine Greek</title>
+  <script src="progress-manager.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -847,6 +848,7 @@ Top 5 research findings applied (2024–2025):
       const userRef = db.collection('users').doc(user.uid);
       const snap = await userRef.get();
       const userData = snap.exists ? (snap.data() || {}) : {};
+      const localProgress = window.syncFromFirebase ? await syncFromFirebase(user.uid) : (window.getProgress ? getProgress() : null);
 
       const today = new Date().toISOString().split('T')[0];
       const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
@@ -860,7 +862,7 @@ Top 5 research findings applied (2024–2025):
       const lvl = calcLevel(xp);
       const streak = Number.isFinite(userData.streak) ? userData.streak : 0;
       const name = (userData.displayName || user.displayName || user.email || "Scholar").trim();
-      const currentLesson = Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1;
+      const currentLesson = (localProgress && Number.isFinite(localProgress.currentLesson)) ? localProgress.currentLesson : (Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1);
       const currentWorld = Number.isFinite(userData.currentWorld) ? userData.currentWorld : Math.max(1, Math.min(5, Math.ceil(currentLesson/5)));
 
       document.getElementById('streakVal').textContent = String(streak);
@@ -921,7 +923,7 @@ Top 5 research findings applied (2024–2025):
         });
 
       worldPreview.innerHTML = '';
-      const completed = Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0;
+      const completed = localProgress && Array.isArray(localProgress.completedLessons) ? localProgress.completedLessons.length : (Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0);
       WORLDS.forEach(w => {
         const start = (w.n-1)*5+1;
         const end = w.n === 5 ? 24 : w.n*5;
