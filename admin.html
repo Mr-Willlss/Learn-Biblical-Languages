@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Admin Portal • Learn Koine Greek</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div id="admin-loader" class="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Checking admin access…</div>
+  </div>
+
+  <div id="admin-app" class="app" style="display:none">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">Ω</div>
+        <div class="brand-text">
+          <div class="title">Koine Greek</div>
+          <div class="sub">Admin Portal</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview" type="button">📊 Overview</button>
+        <button class="nav-item" data-view="students" type="button">👥 Students</button>
+        <button class="nav-item" data-view="lessons" type="button">📚 Lessons</button>
+        <button class="nav-item" data-view="leaderboard" type="button">🏆 Leaderboard</button>
+        <button class="nav-item" data-view="groups" type="button">👥 Study Groups</button>
+        <button class="nav-item" data-view="announcements" type="button">📢 Announcements</button>
+        <button class="nav-item" data-view="settings" type="button">⚙️ Settings</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="me">
+          <div class="me-name" id="admin-me-name">—</div>
+          <div class="me-sub" id="admin-me-email">—</div>
+        </div>
+        <button class="btn ghost" id="admin-signout" type="button">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <div class="h1" id="view-title">Overview</div>
+          <div class="muted" id="view-sub">Monitor progress, engagement, and at-risk learners.</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn" id="refresh-btn" type="button">Refresh</button>
+        </div>
+      </header>
+
+      <!-- OVERVIEW -->
+      <section class="view active" id="view-overview">
+        <div class="grid metrics">
+          <div class="card metric">
+            <div class="label">Total Students</div>
+            <div class="value" id="m-total">—</div>
+          </div>
+          <div class="card metric">
+            <div class="label">Active Today</div>
+            <div class="value" id="m-active">—</div>
+          </div>
+          <div class="card metric">
+            <div class="label">Average Accuracy</div>
+            <div class="value" id="m-acc">—</div>
+          </div>
+          <div class="card metric">
+            <div class="label">Average Streak</div>
+            <div class="value" id="m-streak">—</div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">At-Risk Alerts</div>
+              <div class="muted">Inactive 7+ days • Accuracy &lt; 50% • 0 hearts</div>
+            </div>
+            <div id="at-risk-list" class="list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">World Completion</div>
+              <div class="muted">% of students completed each world</div>
+            </div>
+            <div id="world-bars" class="bars"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Recent Activity</div>
+            <div class="muted">Latest 20 events</div>
+          </div>
+          <div id="activity-feed" class="feed"></div>
+        </div>
+      </section>
+
+      <!-- STUDENTS -->
+      <section class="view" id="view-students">
+        <div class="card">
+          <div class="row">
+            <input id="student-search" class="input" placeholder="Search students by name…" />
+            <div class="muted" id="student-count">—</div>
+          </div>
+          <div class="table-wrap">
+            <table class="table" id="students-table">
+              <thead>
+                <tr>
+                  <th data-sort="displayName">Name</th>
+                  <th data-sort="level">Level</th>
+                  <th data-sort="xp">XP</th>
+                  <th data-sort="currentLesson">Current Lesson</th>
+                  <th data-sort="accuracy">Accuracy %</th>
+                  <th data-sort="streak">Streak</th>
+                  <th data-sort="hearts">Hearts</th>
+                  <th data-sort="lastActiveDate">Last Active</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="drawer" id="student-drawer" aria-hidden="true">
+          <div class="drawer-card">
+            <div class="drawer-head">
+              <div class="drawer-title" id="drawer-title">Student</div>
+              <button class="btn ghost" id="drawer-close" type="button">✕</button>
+            </div>
+            <div id="drawer-body" class="drawer-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LESSONS (placeholder with real data hooks) -->
+      <section class="view" id="view-lessons">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Lessons</div>
+            <div class="muted">Completion rates and difficulty signals (based on stored user stats)</div>
+          </div>
+          <div id="lessons-table-wrap" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD -->
+      <section class="view" id="view-leaderboard">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Top Performers</div>
+            <div class="muted">From Firestore leaderboard collection</div>
+          </div>
+          <div id="leaderboard-list" class="list"></div>
+        </div>
+      </section>
+
+      <!-- GROUPS -->
+      <section class="view" id="view-groups">
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Create Study Group</div>
+              <div class="muted">Admin-created groups for coordination</div>
+            </div>
+            <div class="form">
+              <input class="input" id="group-name" placeholder="Group name" />
+              <input class="input" id="group-desc" placeholder="Description" />
+              <input class="input" id="group-goal" placeholder="Goal (e.g., Complete World 2 by Friday)" />
+              <div class="muted">Members</div>
+              <div class="multi" id="group-member-picker"></div>
+              <button class="btn primary" id="group-create" type="button">Create Group</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Existing Groups</div>
+              <div class="muted">All admin-created groups</div>
+            </div>
+            <div id="groups-list" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANNOUNCEMENTS -->
+      <section class="view" id="view-announcements">
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Send Announcement</div>
+              <div class="muted">Delivered as 🔔 notifications in the student app</div>
+            </div>
+            <div class="form">
+              <input class="input" id="ann-title" placeholder="Title" />
+              <textarea class="input textarea" id="ann-body" placeholder="Message…"></textarea>
+              <select class="input" id="ann-target">
+                <option value="all">All students</option>
+                <option value="group">Study group</option>
+                <option value="individual">Individual student</option>
+              </select>
+              <select class="input" id="ann-target-id"></select>
+              <button class="btn primary" id="ann-send" type="button">Send</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Past Announcements</div>
+              <div class="muted">Latest 20</div>
+            </div>
+            <div id="ann-list" class="feed"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Settings</div>
+            <div class="muted">Admin account</div>
+          </div>
+          <div class="row">
+            <button class="btn" id="open-student-app" type="button">Open student dashboard</button>
+            <button class="btn danger" id="recheck-access" type="button">Re-check access</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase.js"></script>
+
+  <script src="admin.js"></script>
+  <script src="admin-auth.js"></script>
+</body>
+</html>
+

@@ -1,73 +1,12 @@
 (function () {
-  function ensureTutorUi() {
-    if (document.getElementById('ai-tutor-fab')) return;
+  function ensureSharedAiStyles() {
+    if (document.getElementById('kg-shared-ai-styles')) return;
     const style = document.createElement('style');
+    style.id = 'kg-shared-ai-styles';
     style.textContent = `
-      #ai-tutor-fab{position:fixed;right:16px;bottom:18px;z-index:9999;border:1px solid rgba(255,255,255,.15);background:#7c5cfc;color:#fff;border-radius:999px;padding:10px 14px;font-weight:700}
-      #ai-tutor-panel{position:fixed;right:16px;bottom:68px;width:min(360px,92vw);height:min(520px,70vh);z-index:9999;background:#181c27;border:1px solid rgba(255,255,255,.14);border-radius:14px;display:none;flex-direction:column;overflow:hidden}
-      #ai-tutor-panel.open{display:flex}
-      #tutor-top{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
-      #tutor-messages{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
-      .tm{padding:8px 10px;border-radius:10px;max-width:90%;white-space:pre-wrap;color:#e2e8f0;font-size:13px}
-      .tm.you{align-self:flex-end;background:#3b82f633}
-      .tm.sophia{align-self:flex-start;background:#ffffff14}
-      #tutor-bottom{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.1)}
-      #tutor-input{flex:1;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px}
-      #tutor-send-btn,#tutor-clear-btn,#tutor-close-btn{background:#7c5cfc;color:#fff;border:0;border-radius:8px;padding:8px 10px}
       .ai-explain{margin-top:10px;border:1px solid rgba(124,92,252,.35);background:rgba(124,92,252,.08);color:#e2e8f0;border-radius:10px;padding:8px;font-size:12px;display:none}
     `;
     document.head.appendChild(style);
-
-    const fab = document.createElement('button');
-    fab.id = 'ai-tutor-fab';
-    fab.type = 'button';
-    fab.textContent = 'Ask AI Tutor';
-
-    const panel = document.createElement('div');
-    panel.id = 'ai-tutor-panel';
-    panel.innerHTML = `
-      <div id="tutor-top">
-        <button id="tutor-clear-btn" type="button">Clear chat</button>
-        <b>Sophia • AI Tutor</b>
-        <button id="tutor-close-btn" type="button">×</button>
-      </div>
-      <div id="tutor-messages"></div>
-      <div id="tutor-bottom">
-        <input id="tutor-input" placeholder="Ask about grammar, words, translation..." />
-        <button id="tutor-send-btn" type="button">Send</button>
-      </div>
-    `;
-
-    document.body.appendChild(fab);
-    document.body.appendChild(panel);
-
-    fab.addEventListener('click', () => panel.classList.toggle('open'));
-    panel.querySelector('#tutor-close-btn').addEventListener('click', () => panel.classList.remove('open'));
-  }
-
-  function appendMessage(role, text) {
-    const host = document.getElementById('tutor-messages');
-    if (!host) return;
-    const div = document.createElement('div');
-    div.className = `tm ${role}`;
-    div.textContent = text;
-    host.appendChild(div);
-    host.scrollTop = host.scrollHeight;
-  }
-
-  function updateLastMessage(role, text) {
-    const host = document.getElementById('tutor-messages');
-    if (!host) return;
-    const list = host.querySelectorAll(`.tm.${role}`);
-    const el = list[list.length - 1];
-    if (el) el.textContent = text;
-  }
-
-  async function sendTutorMessage(userMessage, chatHistory) {
-    const historyText = chatHistory.map(m => `${m.role}: ${m.text}`).join('\n');
-    const prompt = `Previous conversation:\n${historyText}\n\nStudent's new message: ${userMessage}`;
-    const systemPrompt = `You are Sophia, an expert Koine Greek tutor with deep knowledge of biblical Greek, ancient grammar, and New Testament language. You are warm, encouraging, and patient. Explain concepts clearly using simple English, always giving Greek examples with transliterations and translations. Keep responses under 200 words unless asked for more detail.`;
-    return await window.callGemini(prompt, systemPrompt);
   }
 
   async function generateDynamicExercises(lessonTopic, vocabulary) {
@@ -142,30 +81,8 @@
       nav.appendChild(a);
     });
 
-    ensureTutorUi();
+    ensureSharedAiStyles();
     initTranslateTool();
-
-    const chatHistory = [];
-    const sendBtn = document.getElementById('tutor-send-btn');
-    const chatInput = document.getElementById('tutor-input');
-
-    sendBtn?.addEventListener('click', async () => {
-      const msg = (chatInput.value || '').trim();
-      if (!msg) return;
-      chatHistory.push({ role: 'Student', text: msg });
-      appendMessage('you', msg);
-      chatInput.value = '';
-      appendMessage('sophia', '...thinking...');
-      const reply = await sendTutorMessage(msg, chatHistory);
-      updateLastMessage('sophia', reply || 'Sorry, try again.');
-      chatHistory.push({ role: 'Sophia', text: reply || '' });
-    });
-
-    document.getElementById('tutor-clear-btn')?.addEventListener('click', () => {
-      chatHistory.length = 0;
-      const host = document.getElementById('tutor-messages');
-      if (host) host.innerHTML = '';
-    });
 
     window.triggerWrongExplanation = async (q, wrong, correct) => {
       const box = document.getElementById('ai-explanation');
@@ -192,11 +109,22 @@
       genBtn.disabled = false;
     });
 
-    chatInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendBtn?.click();
-      }
-    });
+    // Add an Admin Portal link in the student sidebar (admins only).
+    // We keep this lightweight and non-blocking.
+    document.addEventListener('authReady', async (ev) => {
+      const user = ev?.detail || null;
+      if (!user || !window.firebase || !firebase.firestore) return;
+      const nav = document.querySelector('.nav');
+      if (!nav || nav.querySelector('a[href="admin.html"]')) return;
+      try {
+        const snap = await firebase.firestore().collection('users').doc(user.uid).get();
+        const data = snap.exists ? (snap.data() || {}) : {};
+        if (!data.isAdmin) return;
+        const a = document.createElement('a');
+        a.href = 'admin.html';
+        a.innerHTML = '<span class="ic">⚙️</span><span class="tx">Admin Portal</span>';
+        nav.appendChild(a);
+      } catch (_) {}
+    }, { once: true });
   });
 })();
