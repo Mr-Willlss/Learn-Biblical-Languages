@@ -577,11 +577,30 @@ Top 5 research findings applied (2024–2025):
       wl.textContent = `Welcome back, ${name}! 🔥 ${streak} day streak`;
       ws.textContent = "Keep going — one lesson a day builds mastery.";
       const continueBtn = document.getElementById('continueBtn');
-      continueBtn.href = `lesson-player.html?lesson=${encodeURIComponent(lessonNum)}`;
-      continueBtn.textContent = `Continue → ${lessonTitle || ('Lesson ' + lessonNum)}`;
+      if (continueBtn) {
+        continueBtn.href = `lesson-player.html?lesson=${encodeURIComponent(lessonNum)}`;
+        continueBtn.textContent = `Continue → ${lessonTitle || ('Lesson ' + lessonNum)}`;
+      }
       const chips = document.querySelectorAll('.meta .chip');
       if (chips[0]) chips[0].innerHTML = `<b>Lesson ${lessonNum}</b> of 24 — World <b>${worldNum}</b>`;
       if (chips[1]) chips[1].innerHTML = `<b>Next</b>: ${lessonTitle || 'Continue your path'}`;
+      chips.forEach(c => c.classList.remove('skel'));
+    }
+
+    function setSignedOutBanner() {
+      const wl = document.getElementById('welcomeTitle');
+      const ws = document.getElementById('welcomeSub');
+      wl.classList.remove('skel');
+      ws.classList.remove('skel');
+      wl.style.width = '';
+      wl.style.height = '';
+      ws.style.width = '';
+      ws.style.height = '';
+      wl.textContent = "Welcome! Sign in to track your progress 🎓";
+      ws.textContent = "Browse lessons, then sign in to save XP, streak, and hearts.";
+      const chips = document.querySelectorAll('.meta .chip');
+      if (chips[0]) chips[0].innerHTML = `<b>Lesson 1</b> of 24 — World <b>1</b>`;
+      if (chips[1]) chips[1].innerHTML = `<b>Next</b>: Sign in to continue`;
       chips.forEach(c => c.classList.remove('skel'));
     }
 
@@ -827,7 +846,13 @@ Top 5 research findings applied (2024–2025):
         document.getElementById('userLevel').textContent = "Sign in to sync";
         document.getElementById('streakVal').textContent = "0";
         renderHearts(5);
-        setBanner("Signed out", 0, 1, 1, "Sign in to continue");
+        setSignedOutBanner();
+        const continueBtn = document.getElementById('continueBtn');
+        if (continueBtn) {
+          continueBtn.textContent = 'Sign In to Continue →';
+          continueBtn.onclick = (e) => { e.preventDefault(); window.location.href = 'index.html'; };
+          continueBtn.href = 'index.html';
+        }
         goalBar.style.width = "0%";
         xpBar.style.width = "0%";
         document.getElementById('streakText').classList.remove('skel');
@@ -879,6 +904,21 @@ Top 5 research findings applied (2024–2025):
       renderHearts(hearts);
 
       setBanner(name, streak, currentLesson, currentWorld, `Lesson ${currentLesson}`);
+      // Ensure Continue button behavior always respects auth state.
+      const continueBtn = document.getElementById('continueBtn');
+      if (continueBtn) {
+        const nextLesson = window.getNextLesson ? getNextLesson() : currentLesson;
+        continueBtn.textContent = `Continue → Lesson ${nextLesson || 1}`;
+        continueBtn.onclick = (e) => {
+          e.preventDefault();
+          const u = firebase.auth().currentUser;
+          if (!u) { window.location.href = 'index.html'; return; }
+          const nl = window.getNextLesson ? getNextLesson() : (nextLesson || 1);
+          if (nl) window.location.href = `lesson-player.html?lesson=${encodeURIComponent(nl)}`;
+          else window.location.href = 'lessons.html';
+        };
+        continueBtn.href = `lesson-player.html?lesson=${encodeURIComponent(nextLesson || 1)}`;
+      }
       document.getElementById('streakText').classList.remove('skel');
       document.getElementById('streakText').textContent = streak ? `You’re on a ${streak}-day streak. Keep it alive today.` : "Start your streak: complete 1 lesson today.";
       const xpText = document.getElementById('xpText');
@@ -938,6 +978,17 @@ Top 5 research findings applied (2024–2025):
 
     (function boot(){
       initFirebase();
+      // Hard-guard: continue button must never send signed-out users to lesson-player.
+      const continueBtn = document.getElementById('continueBtn');
+      if (continueBtn) {
+        continueBtn.addEventListener('click', function(e){
+          const u = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+          if (!u) {
+            e.preventDefault();
+            window.location.href = 'index.html';
+          }
+        }, true);
+      }
       document.addEventListener('authReady', function(e){
         loadUserDashboard(e.detail);
       }, { once: true });
@@ -945,7 +996,6 @@ Top 5 research findings applied (2024–2025):
     })();
 	  </script>
   <script src="gemini.js"></script>
-  <script src="bookmark.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

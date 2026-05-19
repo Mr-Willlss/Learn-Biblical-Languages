@@ -5,6 +5,48 @@
     style.id = 'kg-shared-ai-styles';
     style.textContent = `
       .ai-explain{margin-top:10px;border:1px solid rgba(124,92,252,.35);background:rgba(124,92,252,.08);color:#e2e8f0;border-radius:10px;padding:8px;font-size:12px;display:none}
+
+      /* Mobile header breathing room (student app) */
+      #top-bar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:10px 12px !important;
+        gap:0 !important;
+        overflow:hidden;
+        min-height:52px;
+        max-height:60px;
+        width:100%;
+        box-sizing:border-box;
+      }
+      #top-bar .tbTitle{
+        font-size:0.95rem !important;
+        font-weight:800;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        max-width:90px;
+        flex-shrink:0;
+      }
+      #top-bar .tbRight{
+        display:flex;
+        align-items:center;
+        gap:6px !important;
+        flex-shrink:0;
+        margin-left:auto;
+      }
+      #top-bar .pill{
+        padding:6px 8px !important;
+        font-size:0.80rem !important;
+        gap:6px !important;
+      }
+      #top-bar .avatar{width:28px !important;height:28px !important;border-radius:50% !important}
+      #top-bar .miniName{display:none !important}
+      @media (min-width: 600px){
+        #top-bar .tbTitle{max-width:160px !important;font-size:1.05rem !important}
+        #top-bar .avatar{width:34px !important;height:34px !important;border-radius:12px !important}
+        #top-bar .miniName{display:flex !important}
+      }
     `;
     document.head.appendChild(style);
   }
