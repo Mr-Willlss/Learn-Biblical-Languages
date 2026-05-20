@@ -168,10 +168,12 @@
       return;
     }
     host.innerHTML = items.map(a => {
-      const when = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : (a.timestamp ? new Date(a.timestamp) : null);
+      const rawWhen = a.createdAt || a.timestamp || null;
+      const when = rawWhen && rawWhen.toDate ? rawWhen.toDate() : (rawWhen ? new Date(rawWhen) : null);
       const ts = when ? when.toLocaleString() : '';
-      const t = a.description || a.type || 'Activity';
-      const right = a.xpEarned ? `+${a.xpEarned} XP` : ts;
+      const t = a.title || a.description || a.type || 'Activity';
+      const xp = (a.awardedXp ?? a.xpEarned) || 0;
+      const right = xp ? `+${xp} XP` : ts;
       return `<div class="feed-item"><div><div class="t">${escapeHtml(t)}</div><div class="d">${escapeHtml(ts)}</div></div><div class="d">${escapeHtml(String(right))}</div></div>`;
     }).join('');
   }
@@ -575,7 +577,8 @@
       .collection('users')
       .onSnapshot((snap) => {
         const all = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-        state.students = all.filter(u => !u.isAdmin);
+        // Some datasets store `isAdmin` as a string. Treat only true/"true" as admin.
+        state.students = all.filter(u => !(u.isAdmin === true || u.isAdmin === 'true'));
         renderAll();
       }, (err) => console.warn('students snapshot error', err));
 
@@ -613,23 +616,20 @@
         renderLeaderboard();
       }, (err) => console.warn('leaderboard snapshot error', err));
 
-    // Activity feed (collectionGroup)
+    // Activity feed (top-level `activities` collection)
     if (unsubActivity) unsubActivity();
-    if (firebase.firestore().collectionGroup) {
-      unsubActivity = firebase.firestore()
-        .collectionGroup('activity')
-        .orderBy('timestamp', 'desc')
-        .limit(20)
-        .onSnapshot((snap) => {
-          const items = snap.docs.map(d => d.data() || {});
-          renderActivity(items);
-        }, (err) => {
-          console.warn('activity snapshot error', err);
-          renderActivity([]);
-        });
-    } else {
-      renderActivity([]);
-    }
+    unsubActivity = firebase.firestore()
+      .collection('activities')
+      .where('visibility', '==', 'public')
+      .orderBy('createdAt', 'desc')
+      .limit(20)
+      .onSnapshot((snap) => {
+        const items = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+        renderActivity(items);
+      }, (err) => {
+        console.warn('activity snapshot error', err);
+        renderActivity([]);
+      });
   }
 
   function bootAdmin(user, userData) {
@@ -648,4 +648,3 @@
     bootAdmin(user, userData);
   };
 })();
-

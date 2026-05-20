@@ -3,6 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
 
     // Users can read social data when signed in, but can only write their own user doc + subcollections.
     match /users/{uid} {
@@ -34,6 +38,25 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create, update: if isOwner(uid);
       allow delete: if false;
+    }
+
+    // Public activity feed (used by Admin Portal).
+    match /activities/{activityId} {
+      // Reads are allowed for signed-in users; UI can still filter by visibility.
+      allow read: if signedIn();
+      // Writes allowed for signed-in users (optionally restrict to own actorUid).
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Admin-created study groups (Admin Portal).
+    match /study_groups/{groupId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin announcements (Admin Portal).
+    match /announcements/{announcementId} {
+      allow read, write: if isAdmin();
     }
 
     // Study rooms: members can read/update; host can delete.
