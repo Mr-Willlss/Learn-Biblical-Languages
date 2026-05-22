@@ -205,7 +205,12 @@
 
     tbody.innerHTML = list.map(s => `
       <tr>
-        <td><span class="link" data-open="${escapeHtml(s.id)}">${escapeHtml(studentLabel(s))}</span></td>
+        <td>
+          <span class="link" data-open="${escapeHtml(s.id)}">
+            ${escapeHtml(s.displayName || studentLabel(s))}
+            ${s.isAdmin ? ' <span class="admin-label">👑 Admin</span>' : ''}
+          </span>
+        </td>
         <td>${escapeHtml(String(s.level || 1))}</td>
         <td>${escapeHtml(String(s.xp || 0))}</td>
         <td>${escapeHtml(String(s.currentLesson || 1))}</td>
@@ -577,8 +582,11 @@
       .collection('users')
       .onSnapshot((snap) => {
         const all = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-        // Some datasets store `isAdmin` as a string. Treat only true/"true" as admin.
-        state.students = all.filter(u => !(u.isAdmin === true || u.isAdmin === 'true'));
+        // Show ALL users; only visual difference is an "(Admin)" label in the table.
+        state.students = all.map(u => ({
+          ...u,
+          isAdmin: u.isAdmin === true
+        }));
         renderAll();
       }, (err) => console.warn('students snapshot error', err));
 
