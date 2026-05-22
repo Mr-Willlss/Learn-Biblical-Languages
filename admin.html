@@ -42,18 +42,22 @@
     </aside>
 
     <main class="main">
-      <header class="topbar">
-        <div class="topbar-title">
-          <div class="h1" id="view-title">Overview</div>
-          <div class="muted" id="view-sub">Monitor progress, engagement, and at-risk learners.</div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn" id="refresh-btn" type="button">Refresh</button>
-        </div>
-      </header>
+	      <header class="topbar">
+	        <div class="topbar-title">
+	          <div class="h1" id="view-title">Overview</div>
+	          <div class="muted" id="view-sub">Monitor progress, engagement, and at-risk learners.</div>
+	        </div>
+	        <div class="topbar-actions">
+	          <button class="btn" id="refresh-btn" type="button">Refresh</button>
+	        </div>
+	      </header>
 
-      <!-- OVERVIEW -->
-      <section class="view active" id="view-overview">
+	      <div id="admin-error" class="card" style="display:none;margin-top:12px;border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.08);color:rgba(255,255,255,0.92);font-weight:800">
+	        Admin error
+	      </div>
+
+	      <!-- OVERVIEW -->
+	      <section class="view active" id="view-overview">
         <div class="grid metrics">
           <div class="card metric">
             <div class="label">Total Students</div>
@@ -112,10 +116,12 @@
               <thead>
                 <tr>
                   <th data-sort="displayName">Name</th>
+                  <th data-sort="email">Email</th>
+                  <th data-sort="gender">Gender</th>
                   <th data-sort="level">Level</th>
                   <th data-sort="xp">XP</th>
                   <th data-sort="currentLesson">Current Lesson</th>
-                  <th data-sort="accuracy">Accuracy %</th>
+                  <th data-sort="lessonsCompleted">Lessons Done</th>
                   <th data-sort="streak">Streak</th>
                   <th data-sort="hearts">Hearts</th>
                   <th data-sort="lastActiveDate">Last Active</th>
@@ -243,4 +249,3 @@
   <script src="admin-auth.js"></script>
 </body>
 </html>
-
