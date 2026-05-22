@@ -103,6 +103,33 @@
     return (s.displayName || s.username || s.email || 'Student').trim();
   }
 
+  function normalizeUser(id, d) {
+    const data = d || {};
+    return {
+      id,
+      // Identity
+      displayName: data.displayName || (data.profile && data.profile.displayName) || 'Unknown',
+      username: data.username || (data.profile && data.profile.username) || '',
+      email: data.email || (data.profile && data.profile.email) || '—',
+      photoURL: data.photoURL || (data.profile && data.profile.photoURL) || null,
+
+      // Progress / performance
+      level: Number(data.level) || Number(data.stats && data.stats.level) || 1,
+      xp: Number(data.xp) || Number(data.stats && data.stats.totalXp) || 0,
+      currentLesson: Number(data.currentLesson) || 1,
+      lessonsCompleted: Number(data.lessonsCompleted) || Number(data.stats && data.stats.totalLessonsCompleted) || 0,
+      streak: Number(data.streak) || Number(data.stats && data.stats.streakDays) || 0,
+      hearts: (typeof data.hearts !== 'undefined') ? Number(data.hearts) : 5,
+      lastActiveDate: data.lastActiveDate || '—',
+
+      // Admin flag
+      isAdmin: data.isAdmin === true,
+
+      // Keep additional fields for other views (safe defaults)
+      accuracy: Number(data.accuracy) || 0
+    };
+  }
+
   function renderAtRisk() {
     const host = $('at-risk-list');
     if (!host) return;
@@ -182,7 +209,11 @@
     const q = state.search.trim().toLowerCase();
     let list = state.students.slice();
     if (q) {
-      list = list.filter(s => studentLabel(s).toLowerCase().includes(q));
+      list = list.filter(s =>
+        String(s.displayName || '').toLowerCase().includes(q) ||
+        String(s.username || '').toLowerCase().includes(q) ||
+        String(s.email || '').toLowerCase().includes(q)
+      );
     }
     const { key, dir } = state.sort;
     const mult = dir === 'desc' ? -1 : 1;
@@ -204,43 +235,97 @@
     $('student-count').textContent = `${list.length} student(s)`;
 
     tbody.innerHTML = list.map(s => `
-      <tr>
+      <tr class="student-row" data-id="${escapeHtml(s.id)}">
         <td>
-          <span class="link" data-open="${escapeHtml(s.id)}">
-            ${escapeHtml(s.displayName || studentLabel(s))}
-            ${s.isAdmin ? ' <span class="admin-label">👑 Admin</span>' : ''}
-          </span>
+          <div class="student-name-cell">
+            ${s.photoURL
+              ? `<img src="${escapeHtml(s.photoURL)}" class="student-thumb" alt="${escapeHtml(s.displayName)}">`
+              : `<div class="student-thumb-placeholder">${escapeHtml(String(s.displayName || '?').charAt(0))}</div>`
+            }
+            <div>
+              <div class="student-display-name">
+                ${escapeHtml(s.displayName)}
+                ${s.isAdmin ? '<span class="admin-label">👑 Admin</span>' : ''}
+              </div>
+              <div class="student-username">@${escapeHtml(s.username || '')}</div>
+            </div>
+          </div>
         </td>
+        <td class="student-email">${escapeHtml(s.email || '—')}</td>
         <td>${escapeHtml(String(s.level || 1))}</td>
-        <td>${escapeHtml(String(s.xp || 0))}</td>
-        <td>${escapeHtml(String(s.currentLesson || 1))}</td>
-        <td>${escapeHtml(String(Math.round(Number(s.accuracy || 0))))}</td>
-        <td>${escapeHtml(String(s.streak || 0))}</td>
-        <td>${escapeHtml(String(Number.isFinite(s.hearts) ? s.hearts : 5))}</td>
+        <td>${escapeHtml(String(s.xp || 0))} XP</td>
+        <td>Lesson ${escapeHtml(String(s.currentLesson || 1))}</td>
+        <td>${escapeHtml(String(s.lessonsCompleted || 0))}</td>
+        <td>${escapeHtml(String(s.streak || 0))}d 🔥</td>
+        <td>${escapeHtml(String((s.hearts ?? 5)))}\/5 ❤️</td>
         <td>${escapeHtml(String(s.lastActiveDate || '—'))}</td>
         <td>
-          <select class="input" data-act="${escapeHtml(s.id)}" style="padding:8px;border-radius:10px">
-            <option value="">Actions…</option>
-            <option value="view">View Full Profile</option>
-            <option value="msg">Send Message</option>
-            <option value="resetHearts">Reset Hearts</option>
-            <option value="flag">Flag as At-Risk</option>
-          </select>
+          <div class="action-dropdown">
+            <select class="student-action" data-id="${escapeHtml(s.id)}">
+              <option value="">Actions...</option>
+              <option value="view">View Full Profile</option>
+              <option value="message">Send Message</option>
+              <option value="resetHearts">Reset Hearts</option>
+              <option value="flag">Flag as At-Risk</option>
+            </select>
+          </div>
         </td>
       </tr>
     `).join('');
 
-    tbody.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => openStudentDrawer(el.getAttribute('data-open'))));
-    tbody.querySelectorAll('[data-act]').forEach(sel => sel.addEventListener('change', async () => {
-      const uid = sel.getAttribute('data-act');
+    // Row click opens drawer
+    tbody.querySelectorAll('.student-row').forEach(row => row.addEventListener('click', () => {
+      const uid = row.getAttribute('data-id');
+      openStudentDrawer(uid);
+    }));
+
+    // Actions dropdown
+    tbody.querySelectorAll('.student-action').forEach(sel => sel.addEventListener('change', async (event) => {
+      event.stopPropagation();
+      const uid = sel.getAttribute('data-id');
       const action = sel.value;
       sel.value = '';
       if (!action) return;
-      if (action === 'view') return openStudentDrawer(uid);
-      if (action === 'msg') return openMessagePrompt(uid);
-      if (action === 'resetHearts') return resetHearts(uid);
-      if (action === 'flag') return flagAtRisk(uid);
+      await handleStudentAction(action, uid);
     }));
+  }
+
+  async function handleStudentAction(action, studentId) {
+    const studentData = state.students.find(s => s.id === studentId) || null;
+    if (!studentData) return;
+
+    switch (action) {
+      case 'view':
+        openStudentDrawer(studentId);
+        return;
+      case 'message':
+        setView('announcements');
+        // Best-effort preselect student if dropdown exists
+        setTimeout(() => {
+          const dropdown = $('announcement-student-select');
+          const targetSelect = $('announcement-target');
+          if (targetSelect) {
+            targetSelect.value = 'individual';
+            targetSelect.dispatchEvent(new Event('change'));
+          }
+          if (dropdown) dropdown.value = studentId;
+        }, 250);
+        return;
+      case 'resetHearts':
+        if (window.confirm(`Reset hearts for ${studentData.displayName} to 5?`)) {
+          await resetHearts(studentId);
+          renderStudentsTable();
+        }
+        return;
+      case 'flag':
+        if (window.confirm(`Flag ${studentData.displayName} as at-risk?`)) {
+          await flagAtRisk(studentId);
+          renderStudentsTable();
+        }
+        return;
+      default:
+        return;
+    }
   }
 
   async function openStudentDrawer(uid) {
@@ -582,11 +667,7 @@
       .collection('users')
       .onSnapshot((snap) => {
         const all = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-        // Show ALL users; only visual difference is an "(Admin)" label in the table.
-        state.students = all.map(u => ({
-          ...u,
-          isAdmin: u.isAdmin === true
-        }));
+        state.students = all.map(u => normalizeUser(u.id, u));
         renderAll();
       }, (err) => console.warn('students snapshot error', err));
 

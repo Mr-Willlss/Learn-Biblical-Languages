@@ -96,7 +96,7 @@ button,input,select,textarea{font:inherit}
 .table tr:hover td{background:rgba(255,255,255,0.02)}
 .link{color:var(--purple);font-weight:900;cursor:pointer}
 
-/* Email/Gender columns */
+/* Email column */
 .student-email{
   max-width:180px;
   overflow:hidden;
@@ -109,16 +109,121 @@ button,input,select,textarea{font:inherit}
   font-size:0.85rem;
   word-break:break-all;
 }
-.student-gender{
-  font-size:0.85rem;
-  text-transform:capitalize;
-}
 
 .admin-label{
   font-size:0.75rem;
   color:#a78bfa;
   font-weight:600;
   margin-left:4px;
+}
+
+/* ---- Students table readability (scoped) ---- */
+.students-table-container{
+  overflow-x:auto;
+  border-radius:12px;
+  border:1px solid #2a2a3e;
+  margin-top:12px;
+}
+.admin-students-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.9rem;
+  color:#e0e0e0;
+}
+.admin-table-header th{
+  background:#1a1a2e;
+  color:#a0a0c0;
+  font-size:0.78rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  padding:14px 16px;
+  text-align:left;
+  border-bottom:2px solid #2a2a3e;
+  white-space:nowrap;
+}
+.student-row td{
+  padding:14px 16px;
+  border-bottom:1px solid #1e1e30;
+  color:#d0d0e8;
+  font-size:0.88rem;
+  vertical-align:middle;
+}
+.student-row:nth-child(even) td{background:#13131f}
+.student-row:hover td{background:#1e1e35;cursor:pointer}
+.student-name-cell{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:180px;
+}
+.student-display-name{
+  font-size:0.92rem;
+  font-weight:600;
+  color:#ffffff;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+}
+.student-username{
+  font-size:0.78rem;
+  color:#6666aa;
+  margin-top:2px;
+}
+.student-thumb{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  object-fit:cover;
+  flex-shrink:0;
+}
+.student-thumb-placeholder{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#6c47ff;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:0.9rem;
+  flex-shrink:0;
+}
+.admin-label{
+  font-size:0.72rem;
+  color:#a78bfa;
+  font-weight:700;
+  background:rgba(108,71,255,0.15);
+  padding:2px 6px;
+  border-radius:4px;
+  white-space:nowrap;
+}
+.student-email{
+  max-width:160px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:0.82rem;
+  color:#9999bb;
+}
+.action-dropdown select{
+  background:#2a2a3e;
+  color:#d0d0e8;
+  border:1px solid #444;
+  border-radius:6px;
+  padding:6px 10px;
+  font-size:0.82rem;
+  cursor:pointer;
+  outline:none;
+}
+.action-dropdown select:hover{border-color:#6c47ff}
+.student-count-label{
+  font-size:0.85rem;
+  color:#8888aa;
+  margin-bottom:12px;
+  padding:0 4px;
 }
 
 .drawer{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:flex-end;justify-content:center;z-index:2000}

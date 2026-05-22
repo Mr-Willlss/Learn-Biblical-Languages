@@ -105,33 +105,32 @@
       </section>
 
       <!-- STUDENTS -->
-      <section class="view" id="view-students">
-        <div class="card">
-          <div class="row">
-            <input id="student-search" class="input" placeholder="Search students by name…" />
-            <div class="muted" id="student-count">—</div>
-          </div>
-          <div class="table-wrap">
-            <table class="table" id="students-table">
-              <thead>
-                <tr>
-                  <th data-sort="displayName">Name</th>
-                  <th data-sort="email">Email</th>
-                  <th data-sort="gender">Gender</th>
-                  <th data-sort="level">Level</th>
-                  <th data-sort="xp">XP</th>
-                  <th data-sort="currentLesson">Current Lesson</th>
-                  <th data-sort="lessonsCompleted">Lessons Done</th>
-                  <th data-sort="streak">Streak</th>
-                  <th data-sort="hearts">Hearts</th>
-                  <th data-sort="lastActiveDate">Last Active</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+	      <section class="view" id="view-students">
+	        <div class="card">
+	          <div class="row">
+	            <input id="student-search" class="input" placeholder="Search students by name…" />
+	            <div class="student-count-label" id="student-count">—</div>
+	          </div>
+	          <div class="students-table-container">
+	            <table class="admin-students-table" id="students-table">
+	              <thead>
+	                <tr class="admin-table-header">
+	                  <th>Name</th>
+	                  <th>Email</th>
+	                  <th>Level</th>
+	                  <th>XP</th>
+	                  <th>Current Lesson</th>
+	                  <th>Lessons Done</th>
+	                  <th>Streak</th>
+	                  <th>Hearts</th>
+	                  <th>Last Active</th>
+	                  <th>Actions</th>
+	                </tr>
+	              </thead>
+	              <tbody></tbody>
+	            </table>
+	          </div>
+	        </div>
 
         <div class="drawer" id="student-drawer" aria-hidden="true">
           <div class="drawer-card">
