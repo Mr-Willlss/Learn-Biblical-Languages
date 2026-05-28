@@ -499,6 +499,14 @@
         qScore.textContent = String(correct);
       }
 
+      function getQuestHint(ex) {
+        const explanation = String(ex && ex.explanation ? ex.explanation : '').trim();
+        if (explanation) return explanation;
+        if (ex && ex.type === 'sentence_builder') return 'Use the lesson examples and keep an eye on word order.';
+        if (ex && ex.type === 'translate_to_english') return 'Check the lesson vocabulary list before choosing.';
+        return 'Think about the lesson vocabulary and grammar clues.';
+      }
+
       function draw(){
         stopTimer();
         if (i >= pool.length) return finish();
@@ -516,12 +524,24 @@
             <div class="btnRow" style="margin-top:12px">
               <button class="btn btnPrimary" id="submit" type="button">Submit</button>
               <button class="btn" id="reset" type="button">Reset</button>
+              <button class="btn" id="hint" type="button">Hint</button>
             </div>
+            <div class="hint" id="hintBox" style="display:none"></div>
             <div class="hint" id="explain"></div>
           `;
           const builder = document.getElementById('builder');
           const poolEl = document.getElementById('pool');
           const explain = document.getElementById('explain');
+          const hintBtn = document.getElementById('hint');
+          const hintBox = document.getElementById('hintBox');
+          if (hintBtn && hintBox) {
+            hintBtn.addEventListener('click', () => {
+              const open = hintBox.style.display !== 'block';
+              hintBox.style.display = open ? 'block' : 'none';
+              hintBox.textContent = open ? `Hint: ${getQuestHint(ex)}` : '';
+              hintBtn.textContent = open ? 'Hide hint' : 'Hint';
+            });
+          }
           function renderBuilder(){
             builder.innerHTML = '';
             if (!chosen.length) builder.innerHTML = '<span style="color:var(--tm);font-size:12px">Tap words below…</span>';
@@ -560,10 +580,24 @@
         qBody.innerHTML = `
           <div class="q">${ex.type === 'translate_to_english' ? `<span style="font-family:'Times New Roman',Georgia,serif;font-size:22px">${ex.question}</span>` : ex.question}</div>
           <div class="opts" id="opts"></div>
+          <div class="btnRow" style="margin-top:12px">
+            <button class="btn" id="hint" type="button">Hint</button>
+          </div>
+          <div class="hint" id="hintBox" style="display:none"></div>
           <div class="hint" id="explain"></div>
         `;
         const opts = document.getElementById('opts');
         const explain = document.getElementById('explain');
+        const hintBtn = document.getElementById('hint');
+        const hintBox = document.getElementById('hintBox');
+        if (hintBtn && hintBox) {
+          hintBtn.addEventListener('click', () => {
+            const open = hintBox.style.display !== 'block';
+            hintBox.style.display = open ? 'block' : 'none';
+            hintBox.textContent = open ? `Hint: ${getQuestHint(ex)}` : '';
+            hintBtn.textContent = open ? 'Hide hint' : 'Hint';
+          });
+        }
         (ex.options || []).forEach(opt => {
           const b = document.createElement('button');
           b.className = 'opt';
@@ -657,7 +691,6 @@
       AuthGuard.start({ loginUrl: 'index.html' });
     })();
 	  </script>
-  <script src="gemini.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

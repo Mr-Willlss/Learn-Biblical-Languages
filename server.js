@@ -1,63 +1,62 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const root = process.cwd();
+const port = Number(process.env.PORT || 3001);
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/' +
-  'gemini-2.0-flash:generateContent';
+const contentTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.webp': 'image/webp',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
+};
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, hasKey: !!GEMINI_API_KEY });
-});
+function sendFile(res, filePath) {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Not found');
+      return;
+    }
+    const ext = path.extname(filePath).toLowerCase();
+    res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'application/octet-stream' });
+    res.end(data);
+  });
+}
 
-app.post('/api/gemini', async (req, res) => {
-  try {
-    if (!GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'Missing GEMINI_API_KEY on server' });
+http
+  .createServer((req, res) => {
+    const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+    const safePath = path.normalize(urlPath).replace(/^([/\\])+/, '');
+    const resolvedPath = path.resolve(root, '.' + path.sep + safePath);
+    const filePath = resolvedPath.startsWith(root) ? resolvedPath : path.join(root, 'index.html');
+
+    if (safePath.endsWith('/')) {
+      const dirResolved = path.resolve(root, '.' + path.sep + safePath, 'index.html');
+      if (dirResolved.startsWith(root)) {
+        return sendFile(res, dirResolved);
+      }
     }
 
-    const { prompt, systemPrompt } = req.body || {};
-    if (!prompt || !String(prompt).trim()) {
-      return res.status(400).json({ error: 'Prompt is required' });
-    }
+    fs.stat(filePath, (err, stat) => {
+      if (!err && stat.isFile()) {
+        sendFile(res, filePath);
+        return;
+      }
 
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt || '' }]
-        },
-        contents: [{
-          parts: [{ text: prompt || '' }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1024
-        }
-      })
+      const fallback = path.join(root, 'index.html');
+      sendFile(res, fallback);
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Gemini API error:', data);
-      return res.status(response.status).json({ error: data?.error?.message || 'Gemini API request failed' });
-    }
-
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    res.json({ result: text });
-  } catch (err) {
-    console.error('Gemini proxy error:', err);
-    res.status(500).json({ error: 'Gemini request failed' });
-  }
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Gemini proxy running on port ${PORT}`);
-});
+  })
+  .listen(port, () => {
+    console.log(`Static server running on http://127.0.0.1:${port}`);
+  });

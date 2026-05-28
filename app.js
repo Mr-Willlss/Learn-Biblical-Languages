@@ -1,11 +1,9 @@
 (function () {
-  function ensureSharedAiStyles() {
-    if (document.getElementById('kg-shared-ai-styles')) return;
+  function ensureSharedUiStyles() {
+    if (document.getElementById('kg-shared-ui-styles')) return;
     const style = document.createElement('style');
-    style.id = 'kg-shared-ai-styles';
+    style.id = 'kg-shared-ui-styles';
     style.textContent = `
-      .ai-explain{margin-top:10px;border:1px solid rgba(124,92,252,.35);background:rgba(124,92,252,.08);color:#e2e8f0;border-radius:10px;padding:8px;font-size:12px;display:none}
-
       /* Mobile header breathing room (student app) */
       #top-bar{
         display:flex;
@@ -51,105 +49,8 @@
     document.head.appendChild(style);
   }
 
-  async function generateDynamicExercises(lessonTopic, vocabulary) {
-    const prompt = `Lesson topic: ${lessonTopic}\nVocabulary/letters taught in this lesson:\n${JSON.stringify(vocabulary)}\n\nGenerate 4 new exercises based ONLY on the above.`;
-    const systemPrompt = `You are a Koine Greek exercise generator. Return ONLY valid JSON matching this exact structure: {"exercises":[{"type":"multiple_choice","question":"...","options":["..."],"correct":"...","explanation":"..."}]} No markdown, no backticks, no preamble. Pure JSON only.`;
-    const raw = await window.callGemini(prompt, systemPrompt);
-    if (!raw) return null;
-    try {
-      const cleaned = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-      if (Array.isArray(parsed.exercises)) {
-        parsed.exercises = parsed.exercises.map(ex => ({
-          type: ex.type === 'reverse_translate' || ex.type === 'identify' ? 'multiple_choice' : (ex.type || 'multiple_choice'),
-          question: ex.question || '',
-          options: Array.isArray(ex.options) ? ex.options.slice(0, 4) : [],
-          answer: ex.correct || ex.answer || '',
-          explanation: ex.explanation || ''
-        })).filter(ex => ex.options.length === 4 && ex.answer);
-      }
-      return parsed;
-    } catch (e) {
-      console.error('Exercise parse error:', e, raw);
-      return null;
-    }
-  }
-
-  async function explainWrongAnswer(question, userAnswer, correctAnswer) {
-    const prompt = `Question asked: ${question}\nUser's wrong answer: ${userAnswer}\nCorrect answer: ${correctAnswer}\n\nExplain why the correct answer is right in 2-3 sentences. Include etymology or a memorable English connection if possible. End with one encouraging sentence. Maximum 60 words.`;
-    const systemPrompt = `You are a warm, encouraging Koine Greek tutor. Explain wrong answers briefly and memorably. Always end with encouragement. Maximum 60 words. No bullet points. Plain prose only.`;
-    return await window.callGemini(prompt, systemPrompt);
-  }
-
-  async function translateGreekText(greekInput) {
-    const prompt = `Analyse and translate this Koine Greek text: "${greekInput}"\n\nReturn TRANSLATION, WORD BREAKDOWN, GRAMMAR, and NT EXAMPLE sections.`;
-    const systemPrompt = `You are a Koine Greek translation and analysis engine. Always return exactly these four labelled sections: TRANSLATION, WORD BREAKDOWN, GRAMMAR, NT EXAMPLE. Be concise and scholarly but accessible.`;
-    const result = await window.callGemini(prompt, systemPrompt);
-    const sections = {};
-    ['TRANSLATION', 'WORD BREAKDOWN', 'GRAMMAR', 'NT EXAMPLE'].forEach(label => {
-      const regex = new RegExp(`${label}:\\s*([\\s\\S]*?)(?=\\n[A-Z ]+:|$)`);
-      const match = (result || '').match(regex);
-      sections[label] = match ? match[1].trim() : '';
-    });
-    return sections;
-  }
-
-  function initTranslateTool() {
-    const btn = document.getElementById('translate-btn');
-    btn?.addEventListener('click', async () => {
-      const inputEl = document.getElementById('greek-input');
-      const input = inputEl ? inputEl.value : '';
-      if (!input.trim()) return;
-      btn.textContent = 'Translating...';
-      const sections = await translateGreekText(input);
-      const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || ''; };
-      set('result-translation', sections['TRANSLATION']);
-      set('result-breakdown', sections['WORD BREAKDOWN']);
-      set('result-grammar', sections['GRAMMAR']);
-      set('result-nt', sections['NT EXAMPLE']);
-      btn.textContent = 'Translate & Analyse';
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.sbGroup').forEach(group => {
-      const h3 = group.querySelector('h3');
-      const nav = group.querySelector('.nav');
-      if (!h3 || !nav || h3.textContent.trim().toLowerCase() !== 'learn') return;
-      if (nav.querySelector('a[href=\"ai-translate.html\"]')) return;
-      const a = document.createElement('a');
-      a.href = 'ai-translate.html';
-      a.innerHTML = '<span class=\"ic\">🧠</span><span class=\"tx\">AI Translate</span>';
-      nav.appendChild(a);
-    });
-
-    ensureSharedAiStyles();
-    initTranslateTool();
-
-    window.triggerWrongExplanation = async (q, wrong, correct) => {
-      const box = document.getElementById('ai-explanation');
-      if (!box) return;
-      box.textContent = 'Analysing...';
-      box.style.display = 'block';
-      const text = await explainWrongAnswer(q, wrong, correct);
-      box.textContent = text || '';
-    };
-
-    document.addEventListener('click', async (e) => {
-      const genBtn = e.target.closest('#generate-exercises-btn');
-      if (!genBtn) return;
-      genBtn.textContent = 'Generating...';
-      genBtn.disabled = true;
-      const topic = genBtn.dataset.topic || '';
-      let vocab = [];
-      try { vocab = JSON.parse(genBtn.dataset.vocab || '[]'); } catch (_) {}
-      const result = await generateDynamicExercises(topic, vocab);
-      if (result?.exercises?.length && typeof window.loadDynamicExercises === 'function') {
-        window.loadDynamicExercises(result.exercises);
-      }
-      genBtn.textContent = 'Generate More Practice';
-      genBtn.disabled = false;
-    });
+    ensureSharedUiStyles();
 
     // Add an Admin Portal link in the student sidebar (admins only).
     // We keep this lightweight and non-blocking.

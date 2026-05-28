@@ -1,7 +1,7 @@
 {
   "name": "learn-koine-greek-main",
   "version": "1.0.0",
-  "description": "Koine Greek learning app with Gemini proxy backend",
+  "description": "Koine Greek learning app",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

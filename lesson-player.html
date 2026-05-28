@@ -166,6 +166,7 @@
     .opt.bad{border-color:rgba(239,68,68,0.65);background:rgba(239,68,68,0.10)}
     .feedbackOk{margin-top:10px;color:var(--green);font-weight:900}
     .explain{margin-top:10px;color:var(--tm);font-size:12px;line-height:1.5}
+    .hint{margin-top:8px;color:var(--tm);font-size:12px;line-height:1.5}
     .builderArea{
       margin-top:10px;
       border:1px solid var(--border);
@@ -964,6 +965,13 @@
           };
         });
       }
+      function getExerciseHint(ex) {
+        const explanation = String(ex && ex.explanation ? ex.explanation : '').trim();
+        if (explanation) return explanation;
+        if (ex && ex.type === 'sentence_builder') return 'Use the word order and vocabulary from the lesson examples.';
+        if (ex && ex.type === 'translate_to_english') return 'Look back at the vocabulary list and the lesson notes above.';
+        return 'Use the lesson vocabulary and grammar clues to narrow it down.';
+      }
       function escapeHtml(str) {
         return String(str || '').replace(/[&<>"']/g, function(ch){
           return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
@@ -1157,7 +1165,8 @@
           2:'https://youtu.be/OrpbM1pV8VE',
           3:'https://youtu.be/S-yffMAaQ04',
           4:'https://youtu.be/_4aoAbrkOU8',
-          5:'',6:'',7:'',8:'',9:'',10:'',
+          5:'https://youtu.be/MBWEEKmLrQs',
+          6:'',7:'',8:'',9:'',10:'',
           11:'',12:'',13:'',14:'',15:'',16:'',17:'',18:'',19:'',20:'',
           21:'',22:'',23:'',24:''
         };
@@ -1358,16 +1367,27 @@
             <div class="btnRow">
               <button class="btn btnPrimary" id="submitBtn" type="button">Submit</button>
               <button class="btn" id="resetBtn" type="button">Reset</button>
+              <button class="btn" id="hintBtn" type="button">Hint</button>
               <button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button>
             </div>
+            <div class="hint" id="hintBox" style="display:none"></div>
             <div class="explain" id="explain"></div>
-            <div class="ai-explain" id="ai-explanation"></div>
             <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
           `;
           setCard(`Exercise ${idx+1}/${exercises.length}`, "Phase 2/3 • Sentence Builder", body);
           const poolEl = document.getElementById('pool');
           const builderEl = document.getElementById('builderArea');
           const explainEl = document.getElementById('explain');
+          const hintBtn = document.getElementById('hintBtn');
+          const hintBox = document.getElementById('hintBox');
+          if (hintBtn && hintBox) {
+            hintBtn.addEventListener('click', () => {
+              const open = hintBox.style.display !== 'block';
+              hintBox.style.display = open ? 'block' : 'none';
+              hintBox.textContent = open ? `Hint: ${getExerciseHint(ex)}` : '';
+              hintBtn.textContent = open ? 'Hide hint' : 'Hint';
+            });
+          }
 
           function renderBuilder() {
             builderEl.innerHTML = '';
@@ -1423,7 +1443,6 @@
               loseHeart();
               markCard(false);
               explainEl.textContent = `Not quite. Correct answer: ${(ex.answer || []).join(' ')}. ${ex.explanation || ''}`.trim();
-              if (window.triggerWrongExplanation) window.triggerWrongExplanation(ex.question || '', chosen.join(' '), (ex.answer || []).join(' '));
               tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
@@ -1443,9 +1462,12 @@
         const body = `
           <div class="q">${prompt}</div>
           <div class="opts" id="opts"></div>
-          <div class="btnRow"><button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button></div>
+          <div class="btnRow">
+            <button class="btn" id="hintBtn" type="button">Hint</button>
+            <button class="btn btnPrimary" id="tryAgainBtn" type="button" style="display:none">Try Again</button>
+          </div>
+          <div class="hint" id="hintBox" style="display:none"></div>
           <div class="explain" id="explain"></div>
-          <div class="ai-explain" id="ai-explanation"></div>
           <div class="feedbackOk" id="feedbackOk" style="display:none">✓ Correct!</div>
         `;
         setCard(`Exercise ${idx+1}/${exercises.length}`, `Phase 2/3 • ${isTranslate ? 'Translate' : 'Multiple Choice'}`, body);
@@ -1453,6 +1475,16 @@
         const explainEl = document.getElementById('explain');
         const tryAgainBtn = document.getElementById('tryAgainBtn');
         const feedbackOk = document.getElementById('feedbackOk');
+        const hintBtn = document.getElementById('hintBtn');
+        const hintBox = document.getElementById('hintBox');
+        if (hintBtn && hintBox) {
+          hintBtn.addEventListener('click', () => {
+            const open = hintBox.style.display !== 'block';
+            hintBox.style.display = open ? 'block' : 'none';
+            hintBox.textContent = open ? `Hint: ${getExerciseHint(ex)}` : '';
+            hintBtn.textContent = open ? 'Hide hint' : 'Hint';
+          });
+        }
         (ex.options || []).forEach((opt) => {
           const b = document.createElement('button');
           b.className = 'opt';
@@ -1483,7 +1515,6 @@
                 if ((ch.dataset.opt || '') === ex.answer) ch.classList.add('good');
               });
               explainEl.textContent = `Incorrect. Correct answer: ${ex.answer}. ${ex.explanation || ''}`.trim();
-              if (window.triggerWrongExplanation) window.triggerWrongExplanation(ex.question || '', opt, ex.answer || '');
               tryAgainBtn.style.display = 'inline-flex';
             }
             updateHud();
@@ -1531,7 +1562,6 @@
           ${passed ? `` : `<div style="margin-top:12px;border:1px solid rgba(249,115,22,0.28);background:rgba(249,115,22,0.10);border-radius:16px;padding:10px;color:rgba(226,232,240,0.92)"><b style="color:var(--tw)">60% required to unlock the next lesson.</b> You scored <b style="color:var(--tw)">${accuracy}%</b>. Review and retry to progress.</div>`}
           <div class="btnRow">
             ${passed ? `<a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>` : `<button class="btn btnPrimary" id="retryBtn" type="button">Retry lesson →</button>`}
-            <button class="btn btnPrimary" id="generate-exercises-btn" data-topic="${String(lesson.title).replace(/\"/g,'&quot;')}" data-vocab='${JSON.stringify((lesson.vocabulary||[]).map(v=>v.greek)).replace(/'/g,'&#39;')}'>Generate More Practice</button>
             <button class="btn" id="reviewBtn" type="button">Review lesson</button>
             <a class="btn" href="lessons.html">Back to map</a>
           </div>
@@ -1659,7 +1689,6 @@
       AuthGuard.start({ loginUrl: 'index.html' });
     })();
   </script>
-  <script src="gemini.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
