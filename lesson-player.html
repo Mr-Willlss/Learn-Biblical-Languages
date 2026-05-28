@@ -891,37 +891,67 @@
       const lesson = LESSON_DATA[lessonId];
       const ALPHABET_LETTERS = {
         1: [
-          ["Α","α","Alpha","father"],["Β","β","Beta","ball"],["Γ","γ","Gamma","get"],["Δ","δ","Delta","dog"],
-          ["Ε","ε","Epsilon","met"],["Ζ","ζ","Zeta","zebra"],["Η","η","Eta","they"],["Θ","θ","Theta","think"],
-          ["Ι","ι","Iota","machine"],["Κ","κ","Kappa","kite"],["Λ","λ","Lambda","lamp"],["Μ","μ","Mu","man"]
+          ["Α","α","Alpha","the 'a' in father"],
+          ["Β","β","Beta","the 'b' in ball"],
+          ["Γ","γ","Gamma","the 'g' in get"],
+          ["Δ","δ","Delta","the 'd' in dog"],
+          ["Ε","ε","Epsilon","the 'e' in met"],
+          ["Ζ","ζ","Zeta","the 'z' in zebra"],
+          ["Η","η","Eta","the 'e' in they"],
+          ["Θ","θ","Theta","the 'th' in think"],
+          ["Ι","ι","Iota","the 'i' in machine"],
+          ["Κ","κ","Kappa","the 'k' in kite"],
+          ["Λ","λ","Lambda","the 'l' in lamp"],
+          ["Μ","μ","Mu","the 'm' in man"]
         ],
         2: [
-          ["Ν","ν","Nu","no"],["Ξ","ξ","Xi","ax"],["Ο","ο","Omicron","off"],["Π","π","Pi","pen"],
-          ["Ρ","ρ","Rho","run"],["Σ","σ/ς","Sigma","sun"],["Τ","τ","Tau","top"],["Υ","υ","Upsilon","French 'u'"],
-          ["Φ","φ","Phi","phone"],["Χ","χ","Chi","Bach"],["Ψ","ψ","Psi","lapse"],["Ω","ω","Omega","told"]
+          ["Ν","ν","Nu","the 'n' in no"],
+          ["Ξ","ξ","Xi","the 'x' in axe"],
+          ["Ο","ο","Omicron","the short 'o' in off"],
+          ["Π","π","Pi","the 'p' in pen"],
+          ["Ρ","ρ","Rho","the rolling 'r' in run"],
+          ["Σ","σ/ς","Sigma","the 's' in sun"],
+          ["Τ","τ","Tau","the 't' in top"],
+          ["Υ","υ","Upsilon","the 'u' in flute"],
+          ["Φ","φ","Phi","the 'ph' in phone"],
+          ["Χ","χ","Chi","the 'ch' in loch"],
+          ["Ψ","ψ","Psi","the 'ps' in lapse"],
+          ["Ω","ω","Omega","the long 'o' in told"]
         ]
       };
       function isAlphabetLesson(lsn){ return lsn && (lsn.id === 1 || lsn.id === 2); }
       function buildAlphabetTheory(lsn) {
         return (ALPHABET_LETTERS[lsn.id] || []).map(function(r){
-          return `<div class="gr">${r[0]} ${r[1]} — ${r[2]} — sounds like the '${(r[3]||'').charAt(0)}' in "${r[3]}"</div>`;
+          return `<div class="gr">${r[0]} ${r[1]} — ${r[2]} — ${r[3]}</div>`;
         }).join('');
+      }
+      function buildReviewExerciseForLesson(lsn, seedIndex) {
+        const vocab = Array.isArray(lsn.vocabulary) ? lsn.vocabulary.filter(v => v && v.greek && v.english) : [];
+        const focus = vocab.length ? vocab[seedIndex % vocab.length] : null;
+        const coursePool = Array.from(new Set(
+          Object.values(LESSON_DATA)
+            .flatMap(function(lesson){ return Array.isArray(lesson.vocabulary) ? lesson.vocabulary : []; })
+            .map(function(v){ return v && v.english ? v.english : ''; })
+            .filter(Boolean)
+        ));
+        const distractors = coursePool.filter(function(word){
+          return !focus || word !== focus.english;
+        });
+        const options = shuffle([...(focus ? [focus.english] : []), ...shuffle(distractors).slice(0, 3)]).slice(0, 4);
+        return {
+          type: 'multiple_choice',
+          question: `Quick review: what does ${focus ? focus.greek : 'this word'} mean?`,
+          options: options.length >= 4 ? options : shuffle((focus ? [focus.english] : []).concat(distractors).slice(0, 4)),
+          answer: focus ? focus.english : '',
+          explanation: focus && focus.example ? focus.example : 'Review the lesson vocabulary.'
+        };
       }
       function normalizeExercisesForLesson(lsn) {
         const source = Array.isArray(lsn.exercises) ? lsn.exercises : [];
         return source.map(function(ex){
           if (ex.type !== 'sentence_builder') return ex;
-          if (isAlphabetLesson(lsn)) {
-            const letters = (ALPHABET_LETTERS[lsn.id] || []).map(function(r){ return r[0]; });
-            const sample = shuffle(letters).slice(0,4);
-            const sorted = [...sample].sort(function(a,b){ return letters.indexOf(a) - letters.indexOf(b); });
-            return {
-              type: 'sentence_builder',
-              question: `Arrange these letters in alphabetical order: ${sample.join(', ')}`,
-              words: sample,
-              answer: sorted,
-              explanation: `Correct order: ${sorted.join(' → ')}`
-            };
+          if (lsn.id >= 1 && lsn.id <= 5) {
+            return buildReviewExerciseForLesson(lsn, source.indexOf(ex));
           }
           const vocab = (lsn.vocabulary || []).slice(0,4);
           const pick = vocab[0];
