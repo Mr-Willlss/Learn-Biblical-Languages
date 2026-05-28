@@ -3,6 +3,17 @@
 (function(){
   const KEY = 'kgProgress';
   const MIGRATED_KEY = 'kgProgressMigrated';
+  const SIGNED_OUT_SCOPE = 'signedout';
+  let currentScope = SIGNED_OUT_SCOPE;
+
+  function normalizeScope(scope) {
+    const value = String(scope || '').trim();
+    return value || SIGNED_OUT_SCOPE;
+  }
+
+  function getStorageKey() {
+    return `${KEY}:${normalizeScope(currentScope)}`;
+  }
 
   const WORLD_STRUCTURE = [
     { id: 1, lessons: [1,2,3,4,5], requiredWorld: null },
@@ -35,7 +46,7 @@
 
   function getProgress(){
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(getStorageKey());
       if (!raw) return { ...DEFAULT_PROGRESS };
       const parsed = safeParse(raw, {});
       const merged = { ...DEFAULT_PROGRESS, ...(parsed || {}) };
@@ -52,7 +63,7 @@
   }
 
   function saveProgress(progress){
-    localStorage.setItem(KEY, JSON.stringify(progress));
+    localStorage.setItem(getStorageKey(), JSON.stringify(progress));
   }
 
   function recalcWorlds(progress){
@@ -200,6 +211,7 @@
 
   async function syncFromFirebase(userId){
     try {
+      setProgressScope(userId || SIGNED_OUT_SCOPE);
       if (!userId || typeof db === 'undefined' || !db) return getProgress();
       const doc = await db.collection('users').doc(userId).get();
       if (!doc.exists) return getProgress();
@@ -238,6 +250,15 @@
     }
   }
 
+  function setProgressScope(scope) {
+    currentScope = normalizeScope(scope);
+    return currentScope;
+  }
+
+  function getProgressScope() {
+    return currentScope;
+  }
+
   migrateOldProgress();
 
   window.WORLD_STRUCTURE = WORLD_STRUCTURE;
@@ -260,6 +281,8 @@
   window.getNextLesson = getNextLesson;
   window.getTotalXP = getTotalXP;
   window.migrateOldProgress = migrateOldProgress;
+  window.setProgressScope = setProgressScope;
+  window.getProgressScope = getProgressScope;
   window.syncFromFirebase = syncFromFirebase;
 
   window.Progress = {
@@ -274,6 +297,8 @@
     getNextLesson,
     getTotalXP,
     migrateOldProgress,
+    setProgressScope,
+    getProgressScope,
     syncFromFirebase
   };
 })();

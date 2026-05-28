@@ -40,8 +40,7 @@
 
   function start(opts) {
     opts = opts || {};
-    var loginUrl = opts.loginUrl || "index.html"; // kept for API compatibility; intentionally unused
-    void loginUrl;
+    var loginUrl = opts.loginUrl || "index.html";
 
     if (started) return;
     started = true;
@@ -50,6 +49,18 @@
     function finish(user, reason) {
       if (settled) return;
       settled = true;
+      if (!user && window.location.pathname !== loginUrl) {
+        if (reason) {
+          try {
+            window.GreekQuestFirebaseState = window.GreekQuestFirebaseState || {};
+            if (typeof window.GreekQuestFirebaseState.reason !== "string" || !window.GreekQuestFirebaseState.reason) {
+              window.GreekQuestFirebaseState.reason = reason;
+            }
+          } catch (_) {}
+        }
+        window.location.replace(loginUrl);
+        return;
+      }
       revealPage();
       document.dispatchEvent(new CustomEvent("authReady", { detail: user || null }));
       if (reason) {
@@ -97,7 +108,15 @@
       auth.onAuthStateChanged(
         function (user) {
           clearTimeout(timeoutId);
-          finish(user || null, "");
+          if (!user) {
+            if (window.location.pathname !== loginUrl) {
+              window.location.replace(loginUrl);
+              return;
+            }
+            finish(null, "");
+            return;
+          }
+          finish(user, "");
         },
         function (err) {
           clearTimeout(timeoutId);
@@ -120,4 +139,3 @@
   window.getProgressPayload = getProgressPayload;
   window.getRemoteProgressPayload = getRemoteProgressPayload;
 })();
-

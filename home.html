@@ -1950,8 +1950,18 @@
         return (p[0] || "SW").slice(0, 2).toUpperCase();
       }
 
+      function getProgressStorageKey() {
+        const uid =
+          (typeof auth !== "undefined" && auth && auth.currentUser && auth.currentUser.uid) ||
+          window.gqProgressActiveUid ||
+          localStorage.getItem("greekQuestProgressActiveUid") ||
+          "";
+        const scope = String(uid || "").trim() || "signedout";
+        return `greekQuestProgress:${scope}`;
+      }
+
       function readProgress() {
-        return safeJsonParse(localStorage.getItem("greekQuestProgress")) || {};
+        return safeJsonParse(localStorage.getItem(getProgressStorageKey())) || {};
       }
 
       function readDailyQuest() {
@@ -2254,7 +2264,7 @@
             <div class="signin-callout signedout-only">
               <div>
                 <strong>Sign in to save lesson progress</strong>
-                <span>You can browse lessons as a guest, but progress, XP, and streaks are only shown after you log in.</span>
+                <span>Progress, XP, and streaks are only shown after you log in.</span>
               </div>
               <button class="btn-auth primary" type="button" data-action="signin">Sign in</button>
             </div>
@@ -2780,7 +2790,8 @@
           if (user) {
             showToast(`Signed in as ${user.displayName || user.email || "user"}.`, "success");
           } else {
-            showToast("Signed out.", "info");
+            window.location.href = "index.html";
+            return;
           }
           updateAuthUi();
         });

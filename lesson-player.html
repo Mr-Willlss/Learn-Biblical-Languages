@@ -1174,6 +1174,10 @@
       document.getElementById('pageTitle').textContent = `Lesson ${lessonId}`;
       document.getElementById('pageSub').textContent = lesson.title;
 
+      if (window.setProgressScope) {
+        try { window.setProgressScope(user ? user.uid : ''); } catch(_) {}
+      }
+
       let userData = { hearts:5, heartsUpdatedAt:Date.now(), xp:0, streak:0, lessonsCompleted:0, currentLesson:1, achievements:{} };
       let userRef = null;
       let localProgress = window.getProgress ? getProgress() : { completedLessons: [], currentLesson: 1 };
@@ -1508,7 +1512,7 @@
         if (rb) rb.addEventListener('click', () => { idx = 0; answeredCorrect = 0; correctFirstTry = 0; xpEarned = 0; showTheory(); });
 
         if (!user) {
-          showModal("Save your progress?", "You finished a lesson as a guest. Sign in with Google to save XP, streaks, and friends.", [
+          showModal("Save your progress?", "Sign in with Google so this completion is saved to your account.", [
             { label:"Sign in", primary:true, onClick:()=>location.href='index.html' },
             { label:"Not now", onClick:()=>{} }
           ]);

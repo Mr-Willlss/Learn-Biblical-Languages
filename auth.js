@@ -3,6 +3,22 @@ const authState = {
   user: null
 };
 
+function getScopedProgressKey(uid) {
+  const id = String(uid || "").trim();
+  return id ? `greekQuestProgress:${id}` : "greekQuestProgress:signedout";
+}
+
+function setActiveProgressScope(uid) {
+  const scope = String(uid || "").trim();
+  window.gqProgressActiveUid = scope;
+  try {
+    localStorage.setItem("greekQuestProgressActiveUid", scope || "signedout");
+  } catch (_) {}
+  if (typeof setProgressScope === "function") {
+    try { setProgressScope(scope); } catch (_) {}
+  }
+}
+
 function updateAuthButton() {
   const signBtn = document.getElementById("sign-in-btn");
   const logBtn = document.getElementById("log-in-btn");
@@ -117,6 +133,7 @@ function observeAuth() {
       auth.onAuthStateChanged((user) => {
         authState.user = user || null;
         if (user) {
+          setActiveProgressScope(user.uid);
           window.gqProgressHydrated = false;
           toast(`Signed in as ${user.displayName || user.email}`);
           loadRemoteProgress(user.uid);
@@ -124,8 +141,9 @@ function observeAuth() {
             syncSocialAuthProfile().catch((error) => console.error("Social profile sync failed", error));
           }
         } else {
+          setActiveProgressScope("");
           window.gqProgressHydrated = true;
-          toast("Not signed in. Progress will stay on this device.");
+          toast("Signed out. Please sign in to continue.");
           if (typeof resetSocialState === "function") {
             resetSocialState();
           }
@@ -150,7 +168,7 @@ function observeAuth() {
           heroOutBtn.style.display = signedIn ? "" : "none";
         }
         if (syncBadge) {
-          syncBadge.textContent = user ? "Google sync on" : "Device only";
+          syncBadge.textContent = user ? "Google sync on" : "Sign in required";
         }
         window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
       });
@@ -162,6 +180,7 @@ function loadRemoteProgress(uid) {
     window.gqProgressHydrated = true;
     return;
   }
+  const key = getScopedProgressKey(uid);
   db.collection("users")
     .doc(uid)
     .collection("private")
@@ -170,7 +189,7 @@ function loadRemoteProgress(uid) {
     .then((doc) => {
       if (doc.exists) {
         const remoteData = doc.data() || {};
-        const localRaw = localStorage.getItem("greekQuestProgress");
+        const localRaw = localStorage.getItem(key);
         let localUpdatedAt = 0;
         if (localRaw) {
           try {
@@ -187,7 +206,7 @@ function loadRemoteProgress(uid) {
           return;
         }
         applyProgress(remoteData);
-        localStorage.setItem("greekQuestProgress", JSON.stringify({
+        localStorage.setItem(key, JSON.stringify({
           ...(typeof getProgressPayload === "function" ? getProgressPayload() : {}),
           ...remoteData
         }));
@@ -208,6 +227,10 @@ function saveRemoteProgress(uid) {
     return;
   }
   const payload = typeof getRemoteProgressPayload === "function" ? getRemoteProgressPayload() : getProgressPayload();
+  const key = getScopedProgressKey(uid);
+  try {
+    localStorage.setItem(key, JSON.stringify(payload));
+  } catch (_) {}
   db.collection("users").doc(uid).collection("private").doc("progress").set(payload, { merge: true });
 }
 

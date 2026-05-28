@@ -146,16 +146,6 @@
     .btn:active{transform:translateY(0px)}
     .btn:disabled{opacity:0.7;cursor:not-allowed;filter:saturate(0.9)}
     .btn svg{width:18px;height:18px}
-    .guest{
-      display:block;
-      text-align:center;
-      margin-top:10px;
-      font-weight:700;
-      color:rgba(226,232,240,0.92);
-      opacity:0.9;
-      transition:opacity var(--t1);
-    }
-    .guest:hover{opacity:1}
     .pills{
       display:flex;
       gap:8px;
@@ -341,7 +331,7 @@
 
       if (!initFirebase()) {
         show(card);
-        setErr("Firebase failed to load. You can still continue as guest.");
+        setErr("Firebase failed to load. Please try again.");
       }
 
       if (auth && auth.setPersistence && firebase?.auth?.Auth?.Persistence?.LOCAL) {
@@ -395,7 +385,7 @@
       }
 
       googleBtn.addEventListener('click', async function(){
-        if (!auth || !db) { setErr("Firebase isn't ready. Try again, or continue as guest."); return; }
+        if (!auth || !db) { setErr("Firebase isn't ready. Please try again."); return; }
         setErr('');
         googleBtn.disabled = true;
         try{
@@ -469,7 +459,7 @@
 
       emailForm.addEventListener('submit', async function(e){
         e.preventDefault();
-        if (!auth || !db) { setEmailErr("Firebase isn't ready. Try again, or continue as guest."); return; }
+        if (!auth || !db) { setEmailErr("Firebase isn't ready. Please try again."); return; }
         setEmailErr('');
         emailBtn.disabled = true;
         const email = String(emailInput.value || '').trim();
