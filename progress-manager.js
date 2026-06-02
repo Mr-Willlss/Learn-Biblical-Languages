@@ -147,6 +147,48 @@
     return Number(getProgress().totalXP) || 0;
   }
 
+  async function clearProgress(userId) {
+    const scope = normalizeScope(userId || currentScope);
+    const storageKey = `${KEY}:${scope}`;
+    const fresh = { ...DEFAULT_PROGRESS };
+    try {
+      localStorage.removeItem(storageKey);
+      if (scope === currentScope) {
+        saveProgress(fresh);
+      }
+    } catch (_) {}
+
+    const hasFirebase = typeof firebase !== 'undefined' && firebase && firebase.firestore && typeof db !== 'undefined' && db;
+    if (!scope || scope === SIGNED_OUT_SCOPE || !hasFirebase) {
+      return fresh;
+    }
+
+    try {
+      const userRef = db.collection('users').doc(scope);
+      await Promise.all([
+        userRef.set({
+          xp: 0,
+          level: 1,
+          rank: 'Newcomer',
+          lessonsCompleted: 0,
+          currentLesson: 1,
+          currentWorld: 1,
+          streak: 0,
+          lastActiveDate: '',
+          achievements: {}
+        }, { merge: true }),
+        userRef.collection('private').doc('progress').set({
+          ...fresh,
+          updatedAt: Date.now()
+        })
+      ]);
+    } catch (error) {
+      console.warn('Could not clear remote progress:', error);
+    }
+
+    return fresh;
+  }
+
   function migrateOldProgress(){
     if (localStorage.getItem(MIGRATED_KEY)) return getProgress();
 
@@ -280,6 +322,7 @@
   window.isPracticeUnlocked = isPracticeUnlocked;
   window.getNextLesson = getNextLesson;
   window.getTotalXP = getTotalXP;
+  window.clearProgress = clearProgress;
   window.migrateOldProgress = migrateOldProgress;
   window.setProgressScope = setProgressScope;
   window.getProgressScope = getProgressScope;
@@ -296,6 +339,7 @@
     isPracticeUnlocked,
     getNextLesson,
     getTotalXP,
+    clearProgress,
     migrateOldProgress,
     setProgressScope,
     getProgressScope,

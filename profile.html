@@ -289,8 +289,9 @@
               </div>
               <div class="field">
                 <div class="lbl"><b>Account</b><div>Manage sign-in.</div></div>
-                <div style="display:flex;gap:10px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
                   <button class="btn" id="saveSettingsBtn" type="button">Save</button>
+                  <button class="btn" id="resetProgressBtn" type="button">Clear progress & restart</button>
                 </div>
               </div>
             </div>
@@ -539,6 +540,7 @@
       const goal = Number.isFinite(settings.dailyGoal) ? settings.dailyGoal : 1;
       const tog = document.getElementById('notifTog');
       const goalNum = document.getElementById('goalNum');
+      const resetProgressBtn = document.getElementById('resetProgressBtn');
       tog.classList.toggle('on', notif);
       goalNum.value = String(goal);
       tog.onclick = () => tog.classList.toggle('on');
@@ -549,6 +551,25 @@
           showToast("Settings saved.", "good", "Settings");
         }catch(e){ console.error(e); showToast("Could not save settings.", "bad", "Settings"); }
       };
+      if (resetProgressBtn) {
+        resetProgressBtn.onclick = async () => {
+          const ok = confirm("This will clear your lesson progress and restart you from Lesson 1. Continue?");
+          if (!ok) return;
+          resetProgressBtn.disabled = true;
+          resetProgressBtn.textContent = 'Clearing...';
+          try{
+            if (typeof window.clearProgress === 'function') await window.clearProgress(user.uid);
+            else if (window.Progress && typeof window.Progress.clearProgress === 'function') await window.Progress.clearProgress(user.uid);
+            showToast("Progress cleared. Starting over from Lesson 1.", "good", "Reset");
+            location.href = 'lesson-player.html?lesson=1';
+          }catch(e){
+            console.error(e);
+            showToast("Could not clear progress.", "bad", "Reset");
+            resetProgressBtn.disabled = false;
+            resetProgressBtn.textContent = 'Clear progress & restart';
+          }
+        };
+      }
 
       // Edit profile modal
       editBtn.disabled = false;

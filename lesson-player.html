@@ -1161,7 +1161,7 @@
       function loadLessonVideo(lessonId) {
         // Video URL map — fill these in as videos are created
         const VIDEO_URLS = {
-          1:'https://youtu.be/v7AaqKXNuLI',
+          1:'https://youtu.be/NdG0XKcsOGA',
           2:'https://youtu.be/OrpbM1pV8VE',
           3:'https://youtu.be/S-yffMAaQ04',
           4:'https://youtu.be/_4aoAbrkOU8',
@@ -1563,11 +1563,32 @@
           <div class="btnRow">
             ${passed ? `<a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>` : `<button class="btn btnPrimary" id="retryBtn" type="button">Retry lesson →</button>`}
             <button class="btn" id="reviewBtn" type="button">Review lesson</button>
+            <button class="btn" id="restartBtn" type="button">Clear progress & restart</button>
             <a class="btn" href="lessons.html">Back to map</a>
           </div>
         `;
         setCard("Lesson Complete! 🎉", "Phase 3/3 • Summary", body);
         document.getElementById('reviewBtn').addEventListener('click', () => { idx = 0; answeredCorrect = 0; correctFirstTry = 0; xpEarned = 0; showTheory(); });
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+          restartBtn.addEventListener('click', async () => {
+            restartBtn.disabled = true;
+            restartBtn.textContent = 'Clearing...';
+            try {
+              if (typeof window.clearProgress === 'function') {
+                await window.clearProgress(user ? user.uid : '');
+              } else if (window.Progress && typeof window.Progress.clearProgress === 'function') {
+                await window.Progress.clearProgress(user ? user.uid : '');
+              }
+              window.location.href = 'lesson-player.html?lesson=1';
+            } catch (err) {
+              console.error(err);
+              restartBtn.disabled = false;
+              restartBtn.textContent = 'Clear progress & restart';
+              showToast('Could not clear progress. Try again.', 'bad', 'Reset failed');
+            }
+          });
+        }
         const rb = document.getElementById('retryBtn');
         if (rb) rb.addEventListener('click', () => { idx = 0; answeredCorrect = 0; correctFirstTry = 0; xpEarned = 0; showTheory(); });
 
