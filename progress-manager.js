@@ -64,6 +64,53 @@
 
   function saveProgress(progress){
     localStorage.setItem(getStorageKey(), JSON.stringify(progress));
+    void syncProgressToCloud(progress);
+  }
+
+  function buildCloudPayload(progress) {
+    const p = progress || getProgress();
+    return {
+      updatedAt: Date.now(),
+      xp: Number(p.totalXP) || 0,
+      totalXP: Number(p.totalXP) || 0,
+      level: Number(p.level) || 1,
+      hearts: Number.isFinite(p.hearts) ? p.hearts : 5,
+      streak: Number(p.streak) || 0,
+      lastStudyDate: p.lastStudyDate || null,
+      currentLesson: Math.min(24, Math.max(1, Number(p.currentLesson) || 1)),
+      lessonsCompleted: Array.isArray(p.completedLessons) ? p.completedLessons.length : 0,
+      completedLessons: Array.isArray(p.completedLessons) ? p.completedLessons.slice() : [],
+      unlockedWorlds: Array.isArray(p.unlockedWorlds) ? p.unlockedWorlds.slice() : [1],
+      completedWorlds: Array.isArray(p.completedWorlds) ? p.completedWorlds.slice() : []
+    };
+  }
+
+  async function syncProgressToCloud(progress) {
+    const scope = normalizeScope(currentScope);
+    if (scope === SIGNED_OUT_SCOPE) return;
+    if (typeof db === 'undefined' || !db || typeof firebase === 'undefined') return;
+    try {
+      const payload = buildCloudPayload(progress);
+      const userRef = db.collection('users').doc(scope);
+      await Promise.all([
+        userRef.set({
+          xp: payload.xp,
+          totalXP: payload.totalXP,
+          level: payload.level,
+          hearts: payload.hearts,
+          streak: payload.streak,
+          lastStudyDate: payload.lastStudyDate,
+          currentLesson: payload.currentLesson,
+          lessonsCompleted: payload.lessonsCompleted,
+          completedLessons: payload.completedLessons,
+          unlockedWorlds: payload.unlockedWorlds,
+          completedWorlds: payload.completedWorlds
+        }, { merge: true }),
+        userRef.collection('private').doc('progress').set(payload, { merge: true })
+      ]);
+    } catch (error) {
+      console.warn('Could not sync progress to cloud:', error);
+    }
   }
 
   function recalcWorlds(progress){
@@ -255,10 +302,15 @@
     try {
       setProgressScope(userId || SIGNED_OUT_SCOPE);
       if (!userId || typeof db === 'undefined' || !db) return getProgress();
-      const doc = await db.collection('users').doc(userId).get();
-      if (!doc.exists) return getProgress();
-
-      const firebaseData = doc.data() || {};
+      const userRef = db.collection('users').doc(userId);
+      const [doc, privateDoc] = await Promise.all([
+        userRef.get(),
+        userRef.collection('private').doc('progress').get()
+      ]);
+      const firebaseData = {
+        ...(privateDoc.exists ? (privateDoc.data() || {}) : {}),
+        ...(doc.exists ? (doc.data() || {}) : {})
+      };
       const merged = getProgress();
 
       const completedCount = Number(firebaseData.lessonsCompleted || 0);
@@ -279,9 +331,23 @@
       if (Number(firebaseData.totalXP) > merged.totalXP) merged.totalXP = Number(firebaseData.totalXP);
       if (Number(firebaseData.xp) > merged.totalXP) merged.totalXP = Number(firebaseData.xp);
       if (Number(firebaseData.currentLesson) > merged.currentLesson) merged.currentLesson = Number(firebaseData.currentLesson);
+      if (Number.isFinite(firebaseData.lessonsCompleted)) {
+        const count = Math.max(0, Number(firebaseData.lessonsCompleted));
+        for (let id = 1; id <= Math.min(24, count); id++) {
+          if (!merged.completedLessons.includes(id)) merged.completedLessons.push(id);
+        }
+      }
+      if (Array.isArray(firebaseData.completedLessons)) {
+        firebaseData.completedLessons.forEach(id => {
+          id = Number(id);
+          if (id >= 1 && id <= 24 && !merged.completedLessons.includes(id)) merged.completedLessons.push(id);
+        });
+      }
       if (Number.isFinite(firebaseData.hearts)) merged.hearts = firebaseData.hearts;
       if (Number.isFinite(firebaseData.streak)) merged.streak = firebaseData.streak;
       if (typeof firebaseData.lastActiveDate === 'string' && firebaseData.lastActiveDate) merged.lastStudyDate = firebaseData.lastActiveDate;
+      if (typeof firebaseData.lastStudyDate === 'string' && firebaseData.lastStudyDate) merged.lastStudyDate = firebaseData.lastStudyDate;
+      if (Number.isFinite(firebaseData.level)) merged.level = Number(firebaseData.level);
 
       recalcWorlds(merged);
       saveProgress(merged);

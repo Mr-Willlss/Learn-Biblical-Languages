@@ -1243,6 +1243,44 @@
         return;
       }
 
+      async function saveLessonSnapshot(extra = {}) {
+        if (!userRef || !user) return;
+        const payload = {
+          updatedAt: Date.now(),
+          xp: Number(userData.xp) || 0,
+          totalXP: Number(userData.xp) || 0,
+          level: Number(userData.level) || 1,
+          rank: userData.rank || '',
+          hearts: hearts,
+          streak: Number(userData.streak) || 0,
+          currentLesson: Math.min(24, Math.max(1, Math.max(currentLesson, lessonId))),
+          lessonsCompleted: lessonsCompleted,
+          completedLessons: Array.isArray(localProgress.completedLessons) ? localProgress.completedLessons.slice() : [],
+          currentWorld: Number.isFinite(userData.currentWorld) ? userData.currentWorld : Math.max(1, Math.min(5, Math.ceil(Math.max(currentLesson, lessonId)/5))),
+          ...extra
+        };
+        try {
+          await Promise.all([
+            userRef.set({
+              xp: payload.xp,
+              totalXP: payload.totalXP,
+              level: payload.level,
+              rank: payload.rank,
+              hearts: payload.hearts,
+              streak: payload.streak,
+              currentLesson: payload.currentLesson,
+              currentWorld: payload.currentWorld,
+              lessonsCompleted: payload.lessonsCompleted,
+              completedLessons: payload.completedLessons,
+              lastActiveDate: new Date().toISOString().split('T')[0]
+            }, { merge:true }),
+            userRef.collection('private').doc('progress').set(payload, { merge:true })
+          ]);
+        } catch (error) {
+          console.warn('Could not save lesson snapshot:', error);
+        }
+      }
+
       // Lesson state
       let hearts = clamp(Number.isFinite(userData.hearts) ? userData.hearts : 5, 0, 5);
       let xpEarned = 0;
@@ -1253,6 +1291,10 @@
       let exercises = shuffle(normalizeExercisesForLesson(lesson));
       let idx = 0;
       let totalSteps = 1 + exercises.length + 1;
+
+      if (user) {
+        saveLessonSnapshot();
+      }
 
       window.loadDynamicExercises = function(newExercises) {
         if (!Array.isArray(newExercises) || !newExercises.length) return;
@@ -1643,6 +1685,21 @@
                 completedAt: nowTs,
                 xpEarned: finalXp,
                 accuracy
+              }, { merge:true });
+
+              tx.set(userRef.collection('private').doc('progress'), {
+                updatedAt: nowTs,
+                xp: newXp,
+                totalXP: newXp,
+                level: lvl.level,
+                rank: lvl.title,
+                hearts,
+                streak: nextStreak,
+                currentLesson: nextCurrentLesson,
+                currentWorld: nextWorld,
+                lessonsCompleted: nextLessons,
+                completedLessons: Array.from(new Set([...(Array.isArray(localProgress.completedLessons) ? localProgress.completedLessons : []), lessonId])).sort((a,b)=>a-b),
+                lastStudyDate: today
               }, { merge:true });
 
               tx.set(userRef, {
