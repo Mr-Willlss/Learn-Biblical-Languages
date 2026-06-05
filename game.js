@@ -10,7 +10,6 @@ let lessonWrongCount = 0;
 let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "dark", autoHideSidebar: true };
 let audioCtx = null;
 let masterGain = null;
-let startupPlayed = false;
 let heartRefillTicker = null;
 let vocabReady = false;
 let lessonAdvanceTimer = null;
@@ -2495,50 +2494,3 @@ function openVocabListModal() {
 }
 
 // No auth modal. Sign-in is handled directly by the sidebar buttons.
-
-// Startup chime + intro overlay
-function playStartupChime() {
-  if (!userOptions.sound) return;
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) return;
-  const ctx = new AudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 440;
-  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.5);
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 15);
-  osc.connect(gain).connect(ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime + 15.2);
-}
-
-function playStartupAmbient() {
-  if (startupPlayed || !userOptions.sound) return;
-  initAudio();
-  if (!audioCtx) return;
-  startupPlayed = true;
-
-  const pad = audioCtx.createOscillator();
-  const padGain = audioCtx.createGain();
-  pad.type = "sawtooth";
-  pad.frequency.value = 220;
-  padGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-  padGain.gain.exponentialRampToValueAtTime(userOptions.volume * 0.35, audioCtx.currentTime + 0.8);
-  padGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 15);
-  pad.connect(padGain).connect(masterGain);
-  pad.start();
-  pad.stop(audioCtx.currentTime + 15.2);
-
-  const shimmer = audioCtx.createOscillator();
-  const shimmerGain = audioCtx.createGain();
-  shimmer.type = "triangle";
-  shimmer.frequency.value = 880;
-  shimmerGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-  shimmerGain.gain.exponentialRampToValueAtTime(userOptions.volume * 0.2, audioCtx.currentTime + 0.4);
-  shimmerGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 6);
-  shimmer.connect(shimmerGain).connect(masterGain);
-  shimmer.start();
-  shimmer.stop(audioCtx.currentTime + 6.2);
-}
