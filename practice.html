@@ -418,6 +418,8 @@
       return out;
     }
 
+    function wordText(v){ return (v.greek || v.hebrew || '').trim(); }
+
     function renderLocked(msg) {
       document.getElementById('panelBody').innerHTML = `
         <div class="locked">
@@ -448,7 +450,7 @@
           <div class="card">
             <button class="smallBtn flip" id="flipBtn" type="button">${flipped ? 'Front' : 'Flip'}</button>
             <div class="${flipped ? 'back' : 'front'}">
-              ${flipped ? `<div><b>${v.english}</b></div><div class="ex">${v.example || ''}</div><div class="hint">Lesson ${v.lessonId}</div>` : `<div class="gr">${v.greek}</div><div class="hint">Tap Flip to reveal</div>`}
+              ${flipped ? `<div><b>${v.english}</b></div><div class="ex">${v.example || ''}</div><div class="hint">Lesson ${v.lessonId}</div>` : `<div class="gr">${wordText(v)}</div><div class="hint">Tap Flip to reveal</div>`}
             </div>
           </div>
           <div class="actions">
@@ -605,7 +607,7 @@
         body.innerHTML = `
           <div class="card">
             <div class="front">
-              <div class="gr" style="font-family:'Times New Roman',Georgia,serif;font-size:40px;color:var(--tw)">${v.greek}</div>
+              <div class="gr" style="font-family:'Times New Roman',Georgia,serif;font-size:40px;color:var(--tw)">${wordText(v)}</div>
               <div class="hint">Type the English meaning, then press Enter.</div>
             </div>
           </div>

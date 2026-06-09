@@ -373,11 +373,15 @@
 
     async function loadLessonData() {
       if (window.__LESSON_DATA) return window.__LESSON_DATA;
+      if (window.getLessonDataMap) {
+        window.__LESSON_DATA = window.getLessonDataMap();
+        return window.__LESSON_DATA;
+      }
       if (window.LESSON_DATA) {
         window.__LESSON_DATA = window.LESSON_DATA;
         return window.__LESSON_DATA;
       }
-      throw new Error("LESSON_DATA not found — ensure game-data.js is loaded.");
+      throw new Error("Lesson data not found — ensure game-data.js or hebrew-lesson-data.js is loaded.");
     }
 
     function setTopUser(user, data) {

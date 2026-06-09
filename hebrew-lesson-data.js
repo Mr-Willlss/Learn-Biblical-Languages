@@ -923,229 +923,431 @@ REAL BIBLICAL SENTENCES
   ),
   lesson(
     11, 3,
-    'Review of Lessons 1-10',
-    'Review the first half of the course before moving into verb study.',
-    `Lesson 11 is a major review lesson. It revisits the alphabet, vowels, gender, adjectives, plural forms, pronouns, and the most important reading habits. This prepares the learner for the verb system that follows.`,
+    'Lesson 11 — Review of Lessons 1–10',
+    'Review the first half of the course with a complete survey of letters, vowels, gender, agreement and simple sentence patterns.',
+    `Lesson 11 is a complete review lesson designed to bring together every building block learned so far.
+
+You have already studied the Hebrew alphabet, the seven vowel marks, the special final forms, the definite article הַ, the conjunction וְ, adjectives that agree with nouns, and the first important pronouns. This lesson guides you through those concepts in a way that makes the next half of the course much easier.
+
+The main goal is to do more than memorize lists: you will see how letters, roots, vowels, gender, and agreement work together in actual Hebrew phrases and short sentences. That includes reading simple definite and indefinite expressions, matching adjectives to nouns, and recognizing the pronouns that appear in real text.
+
+After this lesson, you should be able to identify the letter names, read pointed words, and understand the structure of phrases such as הַמֶּלֶךְ גָּדוֹל and הִיא יָפָה without guessing.`,
     [
       v('שֹׁרֶשׁ', 'shoresh', 'root', 'Roots are central to Hebrew vocabulary.'),
       v('הַ', 'ha-', 'the', 'The article appears constantly in reading.'),
-      v('מֶלֶךְ', 'melekh', 'king', 'A useful review noun.')
+      v('מֶלֶךְ', 'melekh', 'king', 'A useful review noun.'),
+      v('סֵפֶר', 'sefer', 'book', 'A very common masculine noun.'),
+      v('זֶה', 'zeh', 'this', 'A demonstrative pronoun you already know.')
     ],
     [
       mc('Which skill belongs to the first ten lessons?', ['Reading vowels and noun agreement', 'Parsing Greek participles', 'Drawing cuneiform tablets', 'Memorizing Roman numerals'], 'Reading vowels and noun agreement', 'The first half of the course is built on reading basics.'),
       tr('What does שֹׁרֶשׁ mean?', ['root', 'king', 'great', 'daughter'], 'root', 'Root is one of the course’s key ideas.'),
+      tr('What does סֵפֶר mean?', ['city', 'book', 'king', 'house'], 'book', 'Sefer is the common Hebrew word for book.'),
       mc('What does הַ mark?', ['the definite article', 'the dual number', 'a verb tense', 'a plural ending'], 'the definite article', 'Ha- marks a specific noun.')
     ],
     24
   ),
   lesson(
     12, 3,
-    'Verbs',
-    'Identify the basic idea of Hebrew verb roots and the value of the three-letter pattern.',
-    `Lesson 12 begins the verb section. The student learns to look for the root letters first and to recognize that verbs are built from regular patterns. This lesson lays the groundwork for understanding conjugation and voice.`,
+    'Lesson 12 — Hebrew Verbs: Roots and Patterns',
+    'Identify the root letters that carry verb meaning and learn how Hebrew verb forms are built from patterns.',
+    `Lesson 12 begins the verb section by teaching the single most important skill for reading Hebrew verbs: identify the root letters first.
+
+Hebrew verbs are built from a consonantal root, usually three letters. That root carries the basic meaning. The other letters and vowels around that root show tense, person, number, and sometimes voice.
+
+This lesson explains how the same root appears in different verb forms. For example, כתב appears in כָּתַב (he wrote) and יִכְתֹּב (he will write). The root is the clue, and the pattern around it is the grammar.
+
+Once you know how to recognize roots, Hebrew verbs become much less intimidating. You start reading them as a system instead of a collection of separate words.`,
     [
       v('כָּתַב', 'katav', 'he wrote', 'A common verb root for writing.'),
       v('לָמַד', 'lamad', 'he learned', 'A common verb root for learning.'),
-      v('שָׁמַר', 'shamar', 'he kept / guarded', 'A common verb root for keeping.')
+      v('שָׁמַר', 'shamar', 'he kept / guarded', 'A common verb root for keeping.'),
+      v('קָרָא', 'kara', 'he called / he read', 'A very frequent verb in narrative.'),
+      v('נָתַן', 'natan', 'he gave', 'A basic verb of giving.')
     ],
     [
       mc('What do Hebrew verbs usually depend on?', ['Root letters and patterns', 'Case endings', 'Capital letters', 'Articles only'], 'Root letters and patterns', 'Verb meaning is tied to the root pattern.'),
-      tr('What does כָּתַב mean?', ['he wrote', 'he learned', 'he went', 'he saw'], 'he wrote', 'Katav is a basic writing verb.')
+      tr('What does כָּתַב mean?', ['he wrote', 'he learned', 'he went', 'he saw'], 'he wrote', 'Katav is a basic writing verb.'),
+      mc('Which root appears in both "he wrote" and "he will write"?', ['כתב', 'למד', 'שמ', 'קרא'], 'כתב', 'The root כתב appears in both forms.'),
+      tr('What does נָתַן mean?', ['he gave', 'he took', 'he came', 'he built'], 'he gave', 'Natan means "he gave."')
     ],
     24
   ),
   lesson(
     13, 3,
-    'Present Tense; More About Gender',
-    'Read present-tense forms and notice how gender still affects agreement.',
-    `Lesson 13 teaches the present tense as it appears in Hebrew and keeps gender in view. The learner sees that nouns, adjectives, and participles still need to agree, so gender remains important in every section of the language.`,
+    'Lesson 13 — Present Tense and Gender Agreement',
+    'Learn present tense forms and see how gender continues to control agreement in Hebrew.',
+    `Lesson 13 introduces the Hebrew present tense and shows that gender is still part of every sentence.
+
+In Hebrew, present-tense verbs change depending on whether the subject is masculine or feminine. For example, כּוֹתֵב is the masculine form and כּוֹתֶבֶת is the feminine form of "writes." This reflects the same agreement system you already used with adjectives.
+
+The lesson also shows how adjectives change when the subject is feminine. If the subject is a queen, the adjective must also be feminine. That means the present tense is not just about verbs—it is about agreement across the phrase.
+
+By the end of this lesson you will be able to read and understand full present-tense phrases like הוּא כּוֹתֵב and הִיא כּוֹתֶבֶת, as well as recognize that adjectives must agree with their nouns.`,
     [
       v('כּוֹתֵב', 'kotev', 'writing / he writes', 'Masculine present form.'),
       v('כּוֹתֶבֶת', 'kotevet', 'writing / she writes', 'Feminine present form.'),
-      v('טוֹב', 'tov', 'good', 'Agreement continues to matter.')
+      v('טוֹב', 'tov', 'good', 'Agreement continues to matter.'),
+      v('טוֹבָה', 'tovah', 'good (feminine)', 'Feminine adjective form.'),
+      v('יָשֵׁב', 'yashev', 'he sits / he lives', 'A common present tense verb.')
     ],
     [
       mc('Which form is feminine?', ['כּוֹתֶבֶת', 'כּוֹתֵב', 'מֶלֶךְ', 'בַּיִת'], 'כּוֹתֶבֶת', 'Kotevet is the feminine form.'),
-      tr('What does כּוֹתֵב mean?', ['writing / he writes', 'house', 'king', 'and'], 'writing / he writes', 'Kotev is the masculine present form.')
+      tr('What does כּוֹתֵב mean?', ['writing / he writes', 'house', 'king', 'and'], 'writing / he writes', 'Kotev is the masculine present form.'),
+      mc('Which adjective matches a feminine subject?', ['טוֹבָה', 'טוֹב', 'סֵפֶר', 'הַמֶּלֶךְ'], 'טוֹבָה', 'Feminine adjectives must agree with feminine nouns.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange these words to say "she writes" in Hebrew.',
+        words: ['הִיא', 'כּוֹתֶבֶת'],
+        answer: ['הִיא', 'כּוֹתֶבֶת'],
+        explanation: 'The subject הִיא is paired with the feminine present form כותבת.'
+      }
     ],
     26
   ),
   lesson(
     14, 3,
-    'More About Verbs',
-    'Deepen your understanding of verb forms, patterns, and how they build meaning.',
-    `Lesson 14 expands the verb discussion with more examples and pattern recognition. The lesson strengthens the student’s ability to notice how forms change while the root remains the same. That skill becomes essential for reading longer passages.`,
+    'Lesson 14 — Verb Patterns and Meaning',
+    'Deepen your understanding of Hebrew verb stems and how meaning remains attached to the root.',
+    `Lesson 14 takes the next step in Hebrew verb study. You already know the root is the heart of a verb; now you learn how different verb forms are made from that same root.
+
+Some verbs look very different in different tenses, but the consonant root stays the same. That is the key to recognizing meaning quickly. This lesson gives more examples so you can see the root clearly even when the vowels and prefixes change.
+
+The lesson also emphasizes that Hebrew verbs are not random: they are patterns with a system. Once you can identify the pattern, you can begin to read verbs even before you have memorized every form.
+
+This is a practical lesson that prepares you to move from short phrases into real reading.`,
     [
       v('אָמַר', 'amar', 'he said', 'A highly common biblical verb.'),
       v('בָּנָה', 'banah', 'he built', 'A simple and useful root.'),
-      v('הָלַךְ', 'halakh', 'he walked / went', 'A very frequent narrative verb.')
+      v('הָלַךְ', 'halakh', 'he walked / went', 'A very frequent narrative verb.'),
+      v('עָנָה', 'anah', 'he answered', 'A verb often found in dialogue.'),
+      v('נָתַן', 'natan', 'he gave', 'A verb with a simple, frequent root.')
     ],
     [
       mc('What stays most important when reading Hebrew verbs?', ['The root letters', 'The English article', 'The page number', 'The marginal notes'], 'The root letters', 'The root is the core of the meaning.'),
-      tr('What does אָמַר mean?', ['he said', 'he walked', 'he wrote', 'he made'], 'he said', 'Amar is one of the most common verbs.')
+      tr('What does אָמַר mean?', ['he said', 'he walked', 'he wrote', 'he made'], 'he said', 'Amar is one of the most common verbs.'),
+      mc('Which word means "he answered"?', ['עָנָה', 'נָתַן', 'לָמַד', 'שָׁמַר'], 'עָנָה', 'Anah means "he answered."'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange these words to say "he built" in Hebrew.',
+        words: ['הוּא', 'בָּנָה'],
+        answer: ['הוּא', 'בָּנָה'],
+        explanation: 'The pronoun הוּא goes with the perfect verb form בָּנָה.'
+      }
     ],
     26
   ),
   lesson(
     15, 3,
-    'Demonstrative Pronouns and Adjectives',
-    'Use this, that, these, and those forms in simple Hebrew phrases.',
-    `Lesson 15 introduces demonstratives. The learner studies the words used for this and that, and sees how demonstrative forms work alongside nouns and adjectives. This helps the student read short descriptive phrases naturally.`,
+    'Lesson 15 — Demonstratives and Descriptive Phrases',
+    'Learn how Hebrew uses this, that, these, and those alongside nouns and adjectives.',
+    `Lesson 15 introduces demonstratives and shows how they work with nouns and adjectives in Hebrew.
+
+Demonstrative pronouns allow you to point to something in the sentence: this, that, these, those. Hebrew uses different forms for masculine, feminine, and plural, and these words appear often in narrative and instruction.
+
+This lesson teaches the forms זֶה, זֹאת, and אֵלֶּה and explains how they fit into the sentence structure. You will also practice the way they combine with nouns and adjectives, so you can read phrases such as זֶה סֵפֶר טוֹב and אֵלֶּה הַבָּתִּים הַגְּדוֹלִים.
+
+Understanding demonstratives is important because they are a common part of Hebrew grammar and help you recognize relationships between words in a phrase.`,
     [
       v('זֶה', 'zeh', 'this / this one', 'Masculine singular demonstrative.'),
       v('זֹאת', 'zot', 'this / this one', 'Feminine singular demonstrative.'),
-      v('אֵלֶּה', 'elleh', 'these', 'Plural demonstrative.')
+      v('אֵלֶּה', 'elleh', 'these', 'Plural demonstrative.'),
+      v('הוּא', 'hu', 'he / it', 'A simple masculine pronoun.'),
+      v('הִיא', 'hi', 'she / it', 'A simple feminine pronoun.')
     ],
     [
       mc('Which word is feminine singular?', ['זֹאת', 'זֶה', 'אֵלֶּה', 'הוּא'], 'זֹאת', 'Zot is the feminine singular form.'),
-      tr('What does אֵלֶּה mean?', ['these', 'that', 'king', 'not'], 'these', 'Elleh is the plural demonstrative.')
+      tr('What does אֵלֶּה mean?', ['these', 'that', 'king', 'not'], 'these', 'Elleh is the plural demonstrative.'),
+      mc('Which word is masculine singular?', ['זֶה', 'זֹאת', 'אֵלֶּה', 'הִיא'], 'זֶה', 'Zeh is the masculine singular demonstrative.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the words to form "this book" in Hebrew.',
+        words: ['זֶה', 'סֵפֶר'],
+        answer: ['זֶה', 'סֵפֶר'],
+        explanation: 'The masculine demonstrative זֶה pairs with masculine noun סֵפֶר.'
+      }
     ],
     28
   ),
   lesson(
     16, 4,
-    'Prepositions',
-    'Recognize the most common Hebrew prepositions attached to the front of words.',
-    `Lesson 16 explains how Hebrew prepositions are often prefixed to a noun. The learner practices the basic forms for in, to, and like, which appear everywhere in biblical Hebrew prose and poetry.`,
+    'Lesson 16 — Prepositions and Prefixed Particles',
+    'Learn the most common Hebrew prepositions and how they attach to words in the sentence.',
+    `Lesson 16 explains how many Hebrew prepositions are written as prefixes attached to the noun or verb that follows.
+
+Hebrew prepositions like בְּ, לְ, כְּ, עַל, and מִן appear in almost every phrase. This lesson teaches how they are formed, how they affect meaning, and how they change the relationship between words.
+
+You will read examples such as בְּבַיִת (in the house), לְמֶלֶךְ (to the king), and כְּדָבָר (like a word). These particles are the glue that connects nouns, verbs, and ideas in Hebrew text.
+
+The goal is to build confidence in recognizing prepositions so that you can read longer phrases without losing the link between the parts.`,
     [
       v('בְּ', 'be-', 'in / with', 'A common prefixed preposition.'),
       v('לְ', 'le-', 'to / for', 'Another very common prefix.'),
-      v('כְּ', 'ke-', 'like / as', 'Used for comparison.')
+      v('כְּ', 'ke-', 'like / as', 'Used for comparison.'),
+      v('עַל', 'al', 'on / upon', 'A preposition that often appears in phrases.'),
+      v('מִן', 'min', 'from', 'A very frequent short preposition.')
     ],
     [
       mc('What does בְּ often mean?', ['in / with', 'not', 'or', 'the'], 'in / with', 'Be- is a basic preposition.'),
-      tr('What does לְ mean?', ['to / for', 'and', 'house', 'peace'], 'to / for', 'Le- is a common Hebrew prefix.')
+      tr('What does לְ mean?', ['to / for', 'and', 'house', 'peace'], 'to / for', 'Le- is a common Hebrew prefix.'),
+      mc('What does עַל mean?', ['on / upon', 'before', 'after', 'between'], 'on / upon', 'Al is another common preposition.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the preposition and noun to say "in the house" in Hebrew.',
+        words: ['בְּ', 'בַּיִת'],
+        answer: ['בְּ', 'בַּיִת'],
+        explanation: 'The preposition בְּ attaches to the noun בַּיִת to mean "in the house."'
+      }
     ],
     28
   ),
   lesson(
     17, 4,
-    'Relative Pronouns; Hebrew Particle את',
-    'Identify the word that links clauses and the marker of the direct object.',
-    `Lesson 17 introduces relative clauses and the direct-object marker. The book stresses that these forms help the reader see how clauses connect and how a direct object is identified in Hebrew prose.`,
+    'Lesson 17 — Relative Clauses and the Direct Object Marker',
+    'Identify the word that links clauses and the marker that marks a definite direct object.',
+    `Lesson 17 shows how Hebrew links two ideas together with a relative pronoun and how it marks a definite direct object with את.
+
+The relative pronoun אֲשֶׁר appears in sentences that describe or identify something: "the book that..." or "the man who..." Recognizing it helps you see where a clause begins and ends.
+
+The particle אֶת is a special helper that marks a definite direct object. It does not translate into English but it tells you exactly which noun is receiving the action.
+
+This lesson makes reading Hebrew smoother because you will know when a phrase is a relative clause and when a noun is the definite object of a verb.`,
     [
       v('אֲשֶׁר', 'asher', 'who / that / which', 'A common relative pronoun.'),
       v('אֶת', 'et', 'direct-object marker', 'Marks the definite direct object.'),
-      v('מִן', 'min', 'from', 'A frequent short preposition.')
+      v('מִן', 'min', 'from', 'A frequent short preposition.'),
+      v('כִּי', 'ki', 'that / because', 'A conjunction often used in clauses.'),
+      v('דָּבָר', 'davar', 'word / thing', 'A very common noun used in many sentences.')
     ],
     [
       mc('Which word marks the direct object?', ['אֶת', 'אֲשֶׁר', 'מִן', 'הַ'], 'אֶת', 'Et marks a definite direct object.'),
-      tr('What does אֲשֶׁר mean?', ['who / that / which', 'in', 'good', 'two'], 'who / that / which', 'Asher introduces a relative clause.')
+      tr('What does אֲשֶׁר mean?', ['who / that / which', 'in', 'good', 'two'], 'who / that / which', 'Asher introduces a relative clause.'),
+      mc('Which word means "because" or "that"?', ['כִּי', 'אֶת', 'זֶה', 'אֵלֶּה'], 'כִּי', 'Ki is a common conjunction.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the words to say "the word that" in Hebrew.',
+        words: ['הַ', 'דָּבָר', 'אֲשֶׁר'],
+        answer: ['הַ', 'דָּבָר', 'אֲשֶׁר'],
+        explanation: 'The relative clause begins with אֲשֶׁר after the noun הַדָּבָר.'
+      }
     ],
     30
   ),
   lesson(
     18, 4,
-    'Review of Lessons 12-17',
-    'Review the verb section, demonstratives, prepositions, and clause markers.',
-    `Lesson 18 is a mid-course review. It revisits the main verb roots, present-tense forms, demonstratives, prepositions, and the relative pronoun. The lesson keeps the learner from moving forward with shaky foundations.`,
+    'Lesson 18 — Mid-Course Review of Verbs and Syntax',
+    'Review verb patterns, demonstratives, prepositions, and clause markers before continuing to more advanced grammar.',
+    `Lesson 18 is a mid-course checkpoint designed to reinforce the grammar from lessons 12 through 17.
+
+This lesson revisits core verb roots, present-tense agreement, demonstratives, prefixed prepositions, and the relative pronoun. The purpose is to build fluency so that you can move forward confidently.
+
+You will practice reading and understanding phrases that blend the grammar you have learned. These review exercises help you see patterns, remember forms, and avoid common beginner mistakes.
+
+By working through this lesson, you are training your eye to recognize how Hebrew grammar holds sentences together. That becomes essential for reading real biblical material.`,
     [
       v('כָּתַב', 'katav', 'he wrote', 'Review of the verb root.'),
       v('זֶה', 'zeh', 'this', 'Review of demonstratives.'),
-      v('אֶת', 'et', 'direct-object marker', 'Review of clause structure.')
+      v('אֶת', 'et', 'direct-object marker', 'Review of clause structure.'),
+      v('זֹאת', 'zot', 'this (feminine)', 'Review of feminine demonstratives.'),
+      v('לְמֶלֶךְ', 'lemelekh', 'to the king', 'Review of prepositional phrases.')
     ],
     [
       mc('Which word is a demonstrative?', ['זֶה', 'אֶת', 'מִן', 'כְּ'], 'זֶה', 'Zeh means this.'),
       tr('What does אֶת mark?', ['the direct object', 'the plural', 'the article', 'the future tense'], 'the direct object', 'Et marks the direct object in Hebrew.'),
-      mc('Which form means from?', ['מִן', 'לְ', 'הַ', 'זֹאת'], 'מִן', 'Min means from.')
+      mc('Which form means from?', ['מִן', 'לְ', 'הַ', 'זֹאת'], 'מִן', 'Min means from.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the phrase for "to the king" in Hebrew.',
+        words: ['לְ', 'מֶלֶךְ'],
+        answer: ['לְ', 'מֶלֶךְ'],
+        explanation: 'The preposition לְ attaches to king מֶלֶךְ to mean "to the king."'
+      }
     ],
     32
   ),
   lesson(
     19, 4,
-    'Review Test',
-    'Check your grasp of the course so far before moving into more advanced grammar.',
-    `Lesson 19 is a formal review test. The aim is not to introduce new grammar but to confirm that the learner can still recognize forms from the alphabet, basic syntax, verbs, and common particles.`,
+    'Lesson 19 — Review Test and Confidence Check',
+    'Check your grasp of the course so far before moving into more advanced grammar and reading practice.',
+    `Lesson 19 is a formal review test that confirms your ability to recognize the essential Hebrew forms learned so far.
+
+This lesson is not about introducing new grammar. It is about proving that you can still identify letters, vowel marks, gender, articles, adjectives, pronouns, verb roots, particles, and clause markers after several lessons.
+
+The review test helps you discover which areas are secure and which require additional practice. That way you enter the final quarter of the course with confidence rather than uncertainty.
+
+You will revisit key concepts in structured examples, and the lesson shows how many of the same ideas appear again and again in real Hebrew reading.`,
     [
       v('הַ', 'ha-', 'the', 'Review of the definite article.'),
       v('כּוֹתֵב', 'kotev', 'writing / he writes', 'Review of present forms.'),
-      v('אֲשֶׁר', 'asher', 'who / that / which', 'Review of relative clauses.')
+      v('אֲשֶׁר', 'asher', 'who / that / which', 'Review of relative clauses.'),
+      v('לֹא', 'lo', 'not', 'Review of negative particles.'),
+      v('שָׁלוֹם', 'shalom', 'peace', 'A familiar review noun.')
     ],
     [
       mc('Which word is the article?', ['הַ', 'מִן', 'אֶת', 'זֶה'], 'הַ', 'Ha- is the definite article.'),
       tr('What does כּוֹתֵב mean?', ['writing / he writes', 'king', 'from', 'this'], 'writing / he writes', 'Kotev is the masculine present form.'),
-      mc('Which word means who / that / which?', ['אֲשֶׁר', 'לְ', 'בְּ', 'גָּדוֹל'], 'אֲשֶׁר', 'Asher is the relative pronoun.')
+      mc('Which word means who / that / which?', ['אֲשֶׁר', 'לְ', 'בְּ', 'גָּדוֹל'], 'אֲשֶׁר', 'Asher is the relative pronoun.'),
+      {
+        type: 'sentence_builder',
+        question: 'Form the review phrase "the word that" in Hebrew.',
+        words: ['הַ', 'דָּבָר', 'אֲשֶׁר'],
+        answer: ['הַ', 'דָּבָר', 'אֲשֶׁר'],
+        explanation: 'The phrase uses the article, noun, and relative pronoun together.'
+      }
     ],
     34
   ),
   lesson(
     20, 4,
-    'Verbs With Guttural Root-Letters; More About Gender',
-    'Read verbs whose roots include guttural consonants and notice the effect on forms.',
-    `Lesson 20 explores how guttural letters can affect verb patterns and pronunciation. The lesson also returns to gender, since Hebrew forms often change according to whether a noun or verb form is masculine or feminine.`,
+    'Lesson 20 — Guttural Verb Roots and Gender',
+    'Learn how guttural letters affect verb patterns and continue to practice gender agreement in verbs and adjectives.',
+    `Lesson 20 explores verbs whose roots include guttural consonants such as ע, ח, and א.
+
+Guttural letters are special in Hebrew because they can influence vowel sounds and the way forms are pronounced. This lesson explains those changes and gives you practice recognizing verbs that contain guttrals.
+
+The lesson also revisits gender because Hebrew verbs and adjectives still agree with the subject. Understanding guttural roots and gender together is essential for accurate reading.
+
+You will read examples such as רוּחַ, עַם, and חָזָק and see how gutturals appear in both nouns and verbs.`,
     [
       v('רוּחַ', 'ruach', 'spirit / wind', 'A common noun containing a guttural.'),
       v('עַם', 'am', 'people', 'A short noun with a guttural.'),
-      v('חָזָק', 'chazaq', 'strong', 'A useful adjective with gutturals.')
+      v('חָזָק', 'chazaq', 'strong', 'A useful adjective with gutturals.'),
+      v('חָכָם', 'chakam', 'wise', 'A related adjective with a guttural.'),
+      v('עָלָה', 'alah', 'he went up / he ascended', 'A verb with a guttural root.')
     ],
     [
       mc('What can guttural consonants affect?', ['Verb patterns and pronunciation', 'Only English spelling', 'Only the article', 'Nothing at all'], 'Verb patterns and pronunciation', 'Gutturals can influence how forms are pronounced.'),
-      tr('What does רוּחַ mean?', ['spirit / wind', 'house', 'king', 'and'], 'spirit / wind', 'Ruach is a common biblical noun.')
+      tr('What does רוּחַ mean?', ['spirit / wind', 'house', 'king', 'and'], 'spirit / wind', 'Ruach is a common biblical noun.'),
+      mc('What does חָכָם mean?', ['wise', 'strong', 'son', 'king'], 'wise', 'Chakam means wise.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the words to say "he went up" in Hebrew.',
+        words: ['הוּא', 'עָלָה'],
+        answer: ['הוּא', 'עָלָה'],
+        explanation: 'The verb עָלָה is paired with the pronoun הוּא.'
+      }
     ],
     34
   ),
   lesson(
     21, 5,
-    'Sentences in the Negative; Declension of Nouns in the Singular',
-    'Form simple negative statements and observe singular noun patterns.',
-    `Lesson 21 shows how Hebrew expresses negation and how singular nouns behave in common patterns. The learner reads short statements that rely on the negative particle and simple noun forms.`,
+    'Lesson 21 — Negation and Singular Noun Patterns',
+    'Form simple negative Hebrew sentences and learn how singular nouns are used in basic statements.',
+    `Lesson 21 teaches the two most important negative tools in Hebrew: לֹא and אֵין.
+
+לֹא is the standard negative particle used to deny a verb or statement. אֵין means "there is not" or "there is no" and is used in sentences about existence or absence.
+
+This lesson also reviews singular noun forms so you can understand the structure behind negative sentences and basic declarations. You will practice reading sentences like לֹא הַמֶּלֶךְ אֵין and אֵין סֵפֶר.
+
+These negative sentences are common in narrative and instruction, and mastering them is essential for reading real Hebrew text.`,
     [
       v('לֹא', 'lo', 'not', 'The simplest negative particle.'),
       v('אֵין', 'ein', 'there is not / there is no', 'A common negative expression.'),
-      v('בֵּן', 'ben', 'son', 'A frequent singular noun.')
+      v('בֵּן', 'ben', 'son', 'A frequent singular noun.'),
+      v('הַמֶּלֶךְ', 'hamelekh', 'the king', 'A definite noun phrase with the article.'),
+      v('שָׁלוֹם', 'shalom', 'peace', 'A familiar noun often used in review.')
     ],
     [
       mc('What does לֹא mean?', ['not', 'and', 'from', 'this'], 'not', 'Lo is the basic negative particle.'),
-      tr('What does אֵין mean?', ['there is not / there is no', 'son', 'house', 'root'], 'there is not / there is no', 'Ein is a common negative expression.')
+      tr('What does אֵין mean?', ['there is not / there is no', 'son', 'house', 'root'], 'there is not / there is no', 'Ein is a common negative expression.'),
+      mc('Which phrase means "the king"?', ['הַמֶּלֶךְ', 'שָׁלוֹם', 'לֹא', 'אֵין'], 'הַמֶּלֶךְ', 'Hamelekh means the king.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange these words to form "not the king" in Hebrew.',
+        words: ['לֹא', 'הַמֶּלֶךְ'],
+        answer: ['לֹא', 'הַמֶּלֶךְ'],
+        explanation: 'The negative particle לֹא comes before the definite noun phrase הַמֶּלֶךְ.'
+      }
     ],
     36
   ),
   lesson(
     22, 5,
-    'Dual Number',
-    'Recognize the special dual form used for pairs and natural twos.',
-    `Lesson 22 introduces the dual number. Hebrew has a special form for paired items and natural pairs such as hands, eyes, and feet. This lesson helps the learner spot that pattern in reading.`,
+    'Lesson 22 — The Dual Number',
+    'Recognize the Hebrew dual form used for natural pairs such as hands, eyes, and feet.',
+    `Lesson 22 introduces the Hebrew dual number, a special plural form used for natural pairs.
+
+Hebrew uses dual forms for words that naturally come in twos, such as hands, feet, and eyes. The dual often ends in -ַיִם or -תַיִם.
+
+This lesson shows you how to read dual nouns and how they differ from ordinary singular and plural forms. That means when you see יָדַיִם or רַגְלַיִם, you immediately know you are reading "two hands" or "two feet."`,
     [
       v('יָדַיִם', 'yadayim', 'two hands', 'A classic dual form.'),
       v('רַגְלַיִם', 'raglayim', 'two feet', 'Another common dual form.'),
-      v('שְׁתַּיִם', 'shtayim', 'two (feminine)', 'Dual-related number form.')
+      v('שְׁתַּיִם', 'shtayim', 'two (feminine)', 'Dual-related number form.'),
+      v('עֵינַיִם', 'einaim', 'two eyes', 'A natural pair that uses the dual.'),
+      v('אָזְנַיִם', 'oznayim', 'two ears', 'Another natural pair with dual form.')
     ],
     [
       mc('What does the dual number usually show?', ['A pair', 'A negative', 'A verb tense', 'A root letter'], 'A pair', 'The dual form is used for paired items.'),
-      tr('What does יָדַיִם mean?', ['two hands', 'two kings', 'two roots', 'two articles'], 'two hands', 'Yadayim is the dual form for hands.')
+      tr('What does יָדַיִם mean?', ['two hands', 'two kings', 'two roots', 'two articles'], 'two hands', 'Yadayim is the dual form for hands.'),
+      mc('Which word means "two eyes"?', ['עֵינַיִם', 'יָדַיִם', 'שָׁלוֹם', 'בֵּן'], 'עֵינַיִם', 'Einaim is the dual form for two eyes.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the words to say "two feet" in Hebrew.',
+        words: ['רַגְלַיִם'],
+        answer: ['רַגְלַיִם'],
+        explanation: 'Raglayim means two feet and appears in dual form.'
+      }
     ],
     36
   ),
   lesson(
     23, 5,
-    'Imperfect Tense',
-    'Read the imperfect tense and understand its basic future or incomplete sense.',
-    `Lesson 23 introduces the imperfect tense. The learner sees that imperfect forms often express incomplete, ongoing, or future action depending on context. This lesson is a bridge into more advanced reading.`,
+    'Lesson 23 — The Imperfect Tense',
+    'Read imperfect forms and understand how Hebrew expresses incomplete, ongoing, or future action.',
+    `Lesson 23 introduces the imperfect tense, which often expresses incomplete, ongoing, or future action in Hebrew.
+
+The imperfect is a powerful aspectual form. It is not always a simple future. It can mean "he will write," "he is writing," or "he does not write," depending on context.
+
+This lesson helps you recognize imperfect verb forms and understand the sense they convey in narrative and poetry. It prepares you to read sentences that describe continuing or future action.`,
     [
       v('יִכְתֹּב', 'yikhtov', 'he will write', 'A common imperfect form.'),
       v('תִּלְמַד', 'tilmad', 'you will learn', 'A second-person imperfect form.'),
-      v('נֵלֵךְ', 'nelekh', 'we will go', 'A first-person plural imperfect form.')
+      v('נֵלֵךְ', 'nelekh', 'we will go', 'A first-person plural imperfect form.'),
+      v('יִרְאֶה', 'yireh', 'he will see', 'A very common imperfect form.'),
+      v('יִשְׁמַע', 'yishma', 'he will hear', 'An imperfect form often found in narrative.')
     ],
     [
       mc('What does the imperfect often express?', ['Incomplete or future action', 'Only past action', 'Only nouns', 'Only adjectives'], 'Incomplete or future action', 'Context determines the exact sense.'),
-      tr('What does יִכְתֹּב mean?', ['he will write', 'he wrote', 'he is king', 'he is good'], 'he will write', 'Yikhtov is the imperfect form of write.')
+      tr('What does יִכְתֹּב mean?', ['he will write', 'he wrote', 'he is king', 'he is good'], 'he will write', 'Yikhtov is the imperfect form of write.'),
+      mc('Which verb means "he will hear"?', ['יִשְׁמַע', 'יִרְאֶה', 'כָּתַב', 'לָמַד'], 'יִשְׁמַע', 'Yishma is the imperfect form meaning he will hear.'),
+      {
+        type: 'sentence_builder',
+        question: 'Select the imperfect form for "he will see".',
+        words: ['יִרְאֶה'],
+        answer: ['יִרְאֶה'],
+        explanation: 'Yireh is the imperfect form meaning he will see.'
+      }
     ],
     38
   ),
   lesson(
     24, 5,
-    'Vocabulary Review',
-    'Review the most important vocabulary from the whole course and finish with confidence.',
-    `Lesson 24 closes the course with a vocabulary review. The learner revisits the most common biblical words from the entire sequence and checks whether the forms are familiar enough to support continued reading and future expansion.`,
+    'Lesson 24 — Vocabulary Review and Mastery',
+    'Review the most important vocabulary from the entire course and close with a confidence-building final challenge.',
+    `Lesson 24 closes the course by reviewing the most important vocabulary you have learned.
+
+This lesson brings the highest-frequency words back into one final practice session so you can test whether the forms are familiar enough to support continued reading.
+
+You will review essential nouns, verbs, particles, and pronouns from the entire course. The lesson ends with a final challenge that asks you to read and recognize the vocabulary in real Hebrew phrases.`,
     [
       v('שָׁלוֹם', 'shalom', 'peace', 'A high-frequency biblical word.'),
       v('חֶסֶד', 'chesed', 'steadfast love / kindness', 'An important theological term.'),
-      v('תוֹרָה', 'torah', 'instruction / law', 'A central Hebrew noun.')
+      v('תוֹרָה', 'torah', 'instruction / law', 'A central Hebrew noun.'),
+      v('אֱלֹהִים', 'elohim', 'God / gods', 'A foundational Hebrew noun.'),
+      v('בֵּן', 'ben', 'son', 'A basic noun used throughout the course.')
     ],
     [
       mc('What does תוֹרָה mean?', ['instruction / law', 'peace', 'king', 'house'], 'instruction / law', 'Torah is a key biblical term.'),
       tr('What does שָׁלוֹם mean?', ['peace', 'root', 'from', 'two'], 'peace', 'Shalom is one of the most familiar Hebrew words.'),
-      mc('Which word means steadfast love / kindness?', ['חֶסֶד', 'אֲשֶׁר', 'לֹא', 'בְּ'], 'חֶסֶד', 'Chesed is an important biblical word.')
+      mc('Which word means steadfast love / kindness?', ['חֶסֶד', 'אֲשֶׁר', 'לֹא', 'בְּ'], 'חֶסֶד', 'Chesed is an important biblical word.'),
+      {
+        type: 'sentence_builder',
+        question: 'Arrange the words to form "God is" in Hebrew.',
+        words: ['אֱלֹהִים', 'הוּא'],
+        answer: ['אֱלֹהִים', 'הוּא'],
+        explanation: 'The noun אֱלֹהִים can be paired with the pronoun הוּא to form "God is."'
+      }
     ],
     42
   )

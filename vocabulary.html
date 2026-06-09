@@ -385,6 +385,8 @@
       return out.toLowerCase();
     }
 
+    function wordText(v){ return (v.greek || v.hebrew || '').trim(); }
+
     function guessType(v) {
       const en = (v.english || '').trim().toLowerCase();
       if (en.startsWith('i ')) return 'verb';
@@ -398,7 +400,7 @@
       return 'noun';
     }
 
-    function keyOf(v){ return `${v.greek}|${v.english}`; }
+    function keyOf(v){ return `${wordText(v)}|${v.english}`; }
 
     function setTopUser(user, data) {
       const xp = Number.isFinite(data?.xp) ? data.xp : 0;
@@ -476,11 +478,11 @@
           if (lesson !== 'all' && String(v.lessonId) !== lesson) return false;
           if (type !== 'all' && guessType(v) !== type) return false;
           if (!q) return true;
-          const g = (v.greek || '').toLowerCase();
+          const g = wordText(v).toLowerCase();
           const e = (v.english || '').toLowerCase();
           const ex = (v.example || '').toLowerCase();
           const ln = String(v.lessonId || '');
-          const r = romanizeGreek(v.greek || '');
+          const r = romanizeGreek(wordText(v));
           return g.includes(q) || e.includes(q) || ex.includes(q) || r.includes(q) || ln.includes(q);
         });
       }
@@ -503,7 +505,7 @@
                 <div class="en">Preview words from Lesson 1</div>
                 <div class="ex">Complete Lesson 1 (60%+) to unlock full vocabulary browsing.</div>
                 <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
-                  ${sample.map(v => `<span style="border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:999px;padding:6px 10px"><span style="font-family:'Times New Roman',Georgia,serif">${v.greek}</span> — ${v.english}</span>`).join('')}
+                  ${sample.map(v => `<span style="border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:999px;padding:6px 10px"><span style="font-family:'Times New Roman',Georgia,serif">${wordText(v)}</span> — ${v.english}</span>`).join('')}
                 </div>
                 <div style="margin-top:12px"><a class="btn" href="${window.getActiveLanguage && window.getActiveLanguage() === 'hebrew' ? 'lesson-hebrew.html' : 'lesson-player.html'}?lesson=1${window.getActiveLanguage && window.getActiveLanguage() === 'hebrew' ? '&lang=hebrew' : ''}">Start Lesson 1 →</a></div>
               </div>
@@ -541,7 +543,7 @@
             card.style.opacity = locked ? '0.65' : '';
             card.innerHTML = `
               <button class="star ${fav ? 'on':''}" type="button" title="${fav ? 'Unstar' : 'Star'}">${fav ? '★' : '☆'}</button>
-              <div class="gr">${v.greek}</div>
+              <div class="gr">${wordText(v)}</div>
               <div class="en">${v.english} ${locked ? '<span style=\"margin-left:6px\">🔒</span>' : ''}</div>
               <div class="ex">${v.example || ''}</div>
               <div class="meta">Lesson ${v.lessonId}</div>
