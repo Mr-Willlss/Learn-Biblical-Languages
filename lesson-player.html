@@ -1200,7 +1200,7 @@
         };
 
         const url = lang === 'hebrew'
-          ? String(lesson.videoUrl || '').trim()
+          ? String(lesson.videoUrl || (window.HEBREW_VIDEO_URLS ? window.HEBREW_VIDEO_URLS[lessonId] : '') || '').trim()
           : (VIDEO_URLS[Number(lessonId)] || '');
         const wrapper = document.getElementById('video-wrapper');
         const placeholder = document.getElementById('video-placeholder');
@@ -1240,12 +1240,6 @@
         }
       }
       document.title = `${lesson.title} • ${langLabel}`;
-      const brandTitle = document.querySelector('.sbTitle');
-      const brandSub = document.querySelector('.sbSub');
-      const brandLink = document.querySelector('.sbBrand');
-      if (brandTitle) brandTitle.textContent = langLabel;
-      if (brandSub) brandSub.textContent = langLabel;
-      if (brandLink) brandLink.href = lang === 'hebrew' ? 'dashboard-hebrew.html?lang=hebrew' : 'dashboard.html';
       document.getElementById('pageTitle').textContent = `Lesson ${lessonId}`;
       document.getElementById('pageSub').textContent = lesson.title;
 

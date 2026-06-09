@@ -189,6 +189,37 @@
       const switchBtn = document.getElementById('switchBtn');
       const statUser = document.getElementById('statUser');
 
+      function createStartupAudioContext() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        return ctx;
+      }
+
+      function playStartupTone() {
+        const ctx = createStartupAudioContext();
+        if (!ctx) return;
+        const gain = ctx.createGain();
+        gain.gain.value = 0.06;
+        gain.connect(ctx.destination);
+        const frequencies = [330, 440, 550];
+        frequencies.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          const start = ctx.currentTime + index * 0.1;
+          osc.start(start);
+          osc.stop(start + 0.18);
+        });
+        setTimeout(() => {
+          try { gain.disconnect(); } catch (_) {}
+        }, 800);
+      }
+
       function selectLanguage(lang) {
         const isGreek = lang === 'greek';
         greekCard.classList.toggle('selected', isGreek);
@@ -201,10 +232,12 @@
       greekCard.addEventListener('click', () => selectLanguage('greek'));
       hebrewCard.addEventListener('click', () => selectLanguage('hebrew'));
       continueBtn.addEventListener('click', () => {
+        playStartupTone();
         const active = localStorage.getItem('activeLanguage') || 'greek';
         window.location.href = active === 'hebrew' ? 'dashboard-hebrew.html' : 'dashboard.html';
       });
       switchBtn.addEventListener('click', () => {
+        playStartupTone();
         const active = localStorage.getItem('activeLanguage') || 'greek';
         window.location.href = active === 'hebrew' ? 'dashboard-hebrew.html' : 'dashboard.html';
       });
