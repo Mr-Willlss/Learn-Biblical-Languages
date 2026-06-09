@@ -41,6 +41,10 @@
   function start(opts) {
     opts = opts || {};
     var loginUrl = opts.loginUrl || "index.html";
+    function isLoginPage(target) {
+      var path = window.location.pathname || "";
+      return path === "/" + target || path === target || path.endsWith("/" + target) || path === "/";
+    }
 
     if (started) return;
     started = true;
@@ -49,7 +53,7 @@
     function finish(user, reason) {
       if (settled) return;
       settled = true;
-      if (!user && window.location.pathname !== loginUrl) {
+      if (!user && !isLoginPage(loginUrl)) {
         if (reason) {
           try {
             window.GreekQuestFirebaseState = window.GreekQuestFirebaseState || {};
@@ -109,7 +113,7 @@
         function (user) {
           clearTimeout(timeoutId);
           if (!user) {
-            if (window.location.pathname !== loginUrl) {
+            if (!isLoginPage(loginUrl)) {
               window.location.replace(loginUrl);
               return;
             }

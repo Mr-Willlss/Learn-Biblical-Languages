@@ -4,24 +4,47 @@
   const KEY = 'kgProgress';
   const MIGRATED_KEY = 'kgProgressMigrated';
   const SIGNED_OUT_SCOPE = 'signedout';
+  const DEFAULT_LANGUAGE = 'greek';
+  const MAX_LESSONS = { greek: 25, hebrew: 24 };
+  const WORLD_STRUCTURES = {
+    greek: [
+      { id: 1, lessons: [1,2,3,4,5], requiredWorld: null },
+      { id: 2, lessons: [6,7,8,9,10], requiredWorld: 1 },
+      { id: 3, lessons: [11,12,13,14,15], requiredWorld: 2 },
+      { id: 4, lessons: [16,17,18,19,20], requiredWorld: 3 },
+      { id: 5, lessons: [21,22,23,24,25], requiredWorld: 4 }
+    ],
+    hebrew: [
+      { id: 1, lessons: [1,2,3,4,5], requiredWorld: null },
+      { id: 2, lessons: [6,7,8,9,10], requiredWorld: 1 },
+      { id: 3, lessons: [11,12,13,14,15], requiredWorld: 2 },
+      { id: 4, lessons: [16,17,18,19,20], requiredWorld: 3 },
+      { id: 5, lessons: [21,22,23,24], requiredWorld: 4 }
+    ]
+  };
   let currentScope = SIGNED_OUT_SCOPE;
+  let currentLanguage = DEFAULT_LANGUAGE;
 
   function normalizeScope(scope) {
     const value = String(scope || '').trim();
     return value || SIGNED_OUT_SCOPE;
   }
 
-  function getStorageKey() {
-    return `${KEY}:${normalizeScope(currentScope)}`;
+  function normalizeLanguage(language) {
+    return String(language || '').trim().toLowerCase() === 'hebrew' ? 'hebrew' : DEFAULT_LANGUAGE;
   }
 
-  const WORLD_STRUCTURE = [
-    { id: 1, lessons: [1,2,3,4,5], requiredWorld: null },
-    { id: 2, lessons: [6,7,8,9,10], requiredWorld: 1 },
-    { id: 3, lessons: [11,12,13,14,15], requiredWorld: 2 },
-    { id: 4, lessons: [16,17,18,19,20], requiredWorld: 3 },
-    { id: 5, lessons: [21,22,23,24], requiredWorld: 4 }
-  ];
+  function getMaxLesson() {
+    return MAX_LESSONS[currentLanguage] || MAX_LESSONS[DEFAULT_LANGUAGE];
+  }
+
+  function getWorldStructure() {
+    return WORLD_STRUCTURES[currentLanguage] || WORLD_STRUCTURES[DEFAULT_LANGUAGE];
+  }
+
+  function getStorageKey() {
+    return `${KEY}:${currentLanguage}:${normalizeScope(currentScope)}`;
+  }
 
   const DEFAULT_PROGRESS = {
     currentLesson: 1,
@@ -39,8 +62,9 @@
     try { return JSON.parse(raw); } catch(_) { return fallback; }
   }
 
-  function normalizeLessons(list){
-    const set = new Set((Array.isArray(list) ? list : []).map(Number).filter(n => Number.isFinite(n) && n >= 1 && n <= 24));
+  function normalizeLessons(list, maxLesson){
+    const max = Number.isFinite(maxLesson) ? maxLesson : getMaxLesson();
+    const set = new Set((Array.isArray(list) ? list : []).map(Number).filter(n => Number.isFinite(n) && n >= 1 && n <= max));
     return Array.from(set).sort((a,b) => a - b);
   }
 
@@ -55,7 +79,7 @@
       if (!merged.unlockedWorlds.length) merged.unlockedWorlds = [1];
       merged.completedWorlds = normalizeLessons(merged.completedWorlds).filter(w => w >= 1 && w <= 5);
       if (!Number.isFinite(merged.currentLesson) || merged.currentLesson < 1) merged.currentLesson = 1;
-      merged.currentLesson = Math.min(24, merged.currentLesson);
+      merged.currentLesson = Math.min(getMaxLesson(), merged.currentLesson);
       return merged;
     } catch(_) {
       return { ...DEFAULT_PROGRESS };
@@ -77,7 +101,7 @@
       hearts: Number.isFinite(p.hearts) ? p.hearts : 5,
       streak: Number(p.streak) || 0,
       lastStudyDate: p.lastStudyDate || null,
-      currentLesson: Math.min(24, Math.max(1, Number(p.currentLesson) || 1)),
+      currentLesson: Math.min(getMaxLesson(), Math.max(1, Number(p.currentLesson) || 1)),
       lessonsCompleted: Array.isArray(p.completedLessons) ? p.completedLessons.length : 0,
       completedLessons: Array.isArray(p.completedLessons) ? p.completedLessons.slice() : [],
       unlockedWorlds: Array.isArray(p.unlockedWorlds) ? p.unlockedWorlds.slice() : [1],
@@ -106,7 +130,7 @@
           unlockedWorlds: payload.unlockedWorlds,
           completedWorlds: payload.completedWorlds
         }, { merge: true }),
-        userRef.collection('private').doc('progress').set(payload, { merge: true })
+        userRef.collection('private').doc(`progress_${currentLanguage}`).set(payload, { merge: true })
       ]);
     } catch (error) {
       console.warn('Could not sync progress to cloud:', error);
@@ -118,13 +142,13 @@
     if (!Array.isArray(p.unlockedWorlds) || !p.unlockedWorlds.length) p.unlockedWorlds = [1];
     if (!Array.isArray(p.completedWorlds)) p.completedWorlds = [];
 
-    WORLD_STRUCTURE.forEach(world => {
+    getWorldStructure().forEach(world => {
       const allDone = world.lessons.every(id => p.completedLessons.includes(id));
       if (allDone && !p.completedWorlds.includes(world.id)) {
         p.completedWorlds.push(world.id);
       }
       if (allDone) {
-        const nextWorld = WORLD_STRUCTURE.find(w => w.requiredWorld === world.id);
+        const nextWorld = getWorldStructure().find(w => w.requiredWorld === world.id);
         if (nextWorld && !p.unlockedWorlds.includes(nextWorld.id)) {
           p.unlockedWorlds.push(nextWorld.id);
         }
@@ -150,7 +174,7 @@
     else if (Number.isFinite(scoreOrXp) && scoreOrXp > 0 && scoreOrXp > 60) xpToAdd = Math.round(scoreOrXp);
 
     p.totalXP = Math.max(0, (Number(p.totalXP) || 0) + xpToAdd);
-    if (passed) p.currentLesson = Math.min(24, Math.max(Number(p.currentLesson) || 1, id + 1));
+    if (passed) p.currentLesson = Math.min(getMaxLesson(), Math.max(Number(p.currentLesson) || 1, id + 1));
     p.lastStudyDate = new Date().toISOString().split('T')[0];
     recalcWorlds(p);
     saveProgress(p);
@@ -170,7 +194,7 @@
 
   function getWorldProgressCount(worldId){
     const p = getProgress();
-    const world = WORLD_STRUCTURE.find(w => w.id === Number(worldId));
+    const world = getWorldStructure().find(w => w.id === Number(worldId));
     if (!world) return { done: 0, total: 0 };
     const done = world.lessons.filter(id => p.completedLessons.includes(id)).length;
     return { done, total: world.lessons.length };
@@ -182,7 +206,7 @@
 
   function getNextLesson(){
     const p = getProgress();
-    for (const world of WORLD_STRUCTURE) {
+    for (const world of getWorldStructure()) {
       if (!p.unlockedWorlds.includes(world.id)) continue;
       const next = world.lessons.find(id => !p.completedLessons.includes(id));
       if (next) return next;
@@ -196,7 +220,7 @@
 
   async function clearProgress(userId) {
     const scope = normalizeScope(userId || currentScope);
-    const storageKey = `${KEY}:${scope}`;
+    const storageKey = `${KEY}:${currentLanguage}:${scope}`;
     const fresh = { ...DEFAULT_PROGRESS };
     try {
       localStorage.removeItem(storageKey);
@@ -224,7 +248,7 @@
           lastActiveDate: '',
           achievements: {}
         }, { merge: true }),
-        userRef.collection('private').doc('progress').set({
+        userRef.collection('private').doc(`progress_${currentLanguage}`).set({
           ...fresh,
           updatedAt: Date.now()
         })
@@ -243,7 +267,7 @@
     const collectIds = (list) => {
       if (!Array.isArray(list)) return;
       list.map(Number).filter(Number.isFinite).forEach(id => {
-        if (id >= 1 && id <= 24 && !p.completedLessons.includes(id)) p.completedLessons.push(id);
+        if (id >= 1 && id <= getMaxLesson() && !p.completedLessons.includes(id)) p.completedLessons.push(id);
       });
     };
 
@@ -262,7 +286,7 @@
       Object.keys(oldLessonProgress).forEach(key => {
         const row = oldLessonProgress[key] || {};
         const id = Number(key);
-        if (id >= 1 && id <= 24 && row.completed) {
+        if (id >= 1 && id <= getMaxLesson() && row.completed) {
           if (!p.completedLessons.includes(id)) p.completedLessons.push(id);
           p.totalXP += Number(row.xpEarned || 0) || 0;
         }
@@ -274,7 +298,7 @@
       Object.keys(koineProgress).forEach(key => {
         const row = koineProgress[key] || {};
         const id = Number(key);
-        if (id >= 1 && id <= 24 && row.completed) {
+        if (id >= 1 && id <= getMaxLesson() && row.completed) {
           if (!p.completedLessons.includes(id)) p.completedLessons.push(id);
           p.totalXP += Number(row.xpEarned || 0) || 0;
         }
@@ -305,7 +329,7 @@
       const userRef = db.collection('users').doc(userId);
       const [doc, privateDoc] = await Promise.all([
         userRef.get(),
-        userRef.collection('private').doc('progress').get()
+        userRef.collection('private').doc(`progress_${currentLanguage}`).get()
       ]);
       const firebaseData = {
         ...(privateDoc.exists ? (privateDoc.data() || {}) : {}),
@@ -315,7 +339,7 @@
 
       const completedCount = Number(firebaseData.lessonsCompleted || 0);
       if (completedCount > 0) {
-        for (let id = 1; id <= Math.min(24, completedCount); id++) {
+        for (let id = 1; id <= Math.min(getMaxLesson(), completedCount); id++) {
           if (!merged.completedLessons.includes(id)) merged.completedLessons.push(id);
         }
       }
@@ -323,7 +347,7 @@
       if (Array.isArray(firebaseData.completedLessons)) {
         firebaseData.completedLessons.forEach(id => {
           id = Number(id);
-          if (id >= 1 && id <= 24 && !merged.completedLessons.includes(id)) merged.completedLessons.push(id);
+          if (id >= 1 && id <= getMaxLesson() && !merged.completedLessons.includes(id)) merged.completedLessons.push(id);
         });
       }
 
@@ -333,14 +357,14 @@
       if (Number(firebaseData.currentLesson) > merged.currentLesson) merged.currentLesson = Number(firebaseData.currentLesson);
       if (Number.isFinite(firebaseData.lessonsCompleted)) {
         const count = Math.max(0, Number(firebaseData.lessonsCompleted));
-        for (let id = 1; id <= Math.min(24, count); id++) {
+        for (let id = 1; id <= Math.min(getMaxLesson(), count); id++) {
           if (!merged.completedLessons.includes(id)) merged.completedLessons.push(id);
         }
       }
       if (Array.isArray(firebaseData.completedLessons)) {
         firebaseData.completedLessons.forEach(id => {
           id = Number(id);
-          if (id >= 1 && id <= 24 && !merged.completedLessons.includes(id)) merged.completedLessons.push(id);
+          if (id >= 1 && id <= getMaxLesson() && !merged.completedLessons.includes(id)) merged.completedLessons.push(id);
         });
       }
       if (Number.isFinite(firebaseData.hearts)) merged.hearts = firebaseData.hearts;
@@ -367,9 +391,34 @@
     return currentScope;
   }
 
+  function setLanguageScope(language) {
+    currentLanguage = normalizeLanguage(language);
+    try { localStorage.setItem('activeLanguage', currentLanguage); } catch (_) {}
+    return currentLanguage;
+  }
+
+  function getLanguage() {
+    return currentLanguage;
+  }
+
+  function getCombinedStats(uid) {
+    const scope = normalizeScope(uid || currentScope);
+    return ['greek', 'hebrew'].reduce((acc, lang) => {
+      const raw = localStorage.getItem(`${KEY}:${lang}:${scope}`);
+      const parsed = safeParse(raw, {});
+      acc.totalXP += Number(parsed.totalXP || parsed.xp || 0) || 0;
+      acc.totalLessons += Array.isArray(parsed.completedLessons) ? parsed.completedLessons.length : (Number(parsed.lessonsCompleted || 0) || 0);
+      acc.streak = Math.max(acc.streak, Number(parsed.streak || 0) || 0);
+      return acc;
+    }, { totalXP: 0, totalLessons: 0, streak: 0 });
+  }
+
+  const initialLanguage = normalizeLanguage(localStorage.getItem('activeLanguage') || DEFAULT_LANGUAGE);
+  setLanguageScope(initialLanguage);
+
   migrateOldProgress();
 
-  window.WORLD_STRUCTURE = WORLD_STRUCTURE;
+  window.WORLD_STRUCTURE = getWorldStructure();
   window.DEFAULT_PROGRESS = DEFAULT_PROGRESS;
   window.getProgress = getProgress;
   window.saveProgress = saveProgress;
@@ -378,7 +427,7 @@
   window.getUnlockedLessons = function(){
     const p = getProgress();
     const unlocked = [];
-    WORLD_STRUCTURE.forEach(w => {
+    getWorldStructure().forEach(w => {
       if (p.unlockedWorlds.includes(w.id)) unlocked.push(...w.lessons);
     });
     return unlocked.sort((a,b)=>a-b);
@@ -392,6 +441,11 @@
   window.migrateOldProgress = migrateOldProgress;
   window.setProgressScope = setProgressScope;
   window.getProgressScope = getProgressScope;
+  window.setLanguageScope = setLanguageScope;
+  window.getLanguage = getLanguage;
+  window.getWorldStructure = getWorldStructure;
+  window.getMaxLesson = getMaxLesson;
+  window.getCombinedStats = getCombinedStats;
   window.syncFromFirebase = syncFromFirebase;
 
   window.Progress = {
@@ -409,6 +463,12 @@
     migrateOldProgress,
     setProgressScope,
     getProgressScope,
+    setLanguageScope,
+    getLanguage,
+    getWorldStructure,
+    getMaxLesson,
+    getCombinedStats,
     syncFromFirebase
   };
+  window.ProgressManager = window.Progress;
 })();

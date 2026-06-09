@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Biblical Languages">
+  <title>Language Selection • Biblical Languages</title>
+  <script src="progress-manager.js"></script>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--blue2:#1d4ed8;--gold:#eab308;--gold2:#ca8a04;
+      --green:#22c55e;--green2:#16a34a;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;--sw:220px;--t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    body[data-page="dashboard"] .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{position:sticky;top:0;z-index:50;background:rgba(15,17,23,0.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .pill b{color:var(--tw)}
+    .avatar{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));display:grid;place-items:center;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:980px;width:100%;margin:0 auto}
+    .page{min-height:100%;position:relative;display:grid;place-items:center;padding:28px 18px;overflow:hidden}
+    .hero{border:1px solid var(--border);border-radius:28px;background:linear-gradient(180deg, rgba(24,28,39,0.84), rgba(17,20,30,0.78));backdrop-filter:blur(18px);box-shadow:0 28px 70px rgba(0,0,0,0.48);padding:26px;position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:-1px;background:linear-gradient(125deg, rgba(124,92,252,0.14), transparent 30%, rgba(59,130,246,0.10) 68%, transparent);opacity:0.9;pointer-events:none}
+    .hero > *{position:relative;z-index:1}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:var(--rp);border:1px solid rgba(124,92,252,0.22);background:rgba(124,92,252,0.10);color:#d9d0ff;font-size:12px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:14px}
+    .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg, var(--purple), var(--blue));box-shadow:0 0 0 6px rgba(124,92,252,0.12)}
+    .title{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px, 4vw, 54px);line-height:0.96;letter-spacing:-0.05em;color:var(--tw);max-width:14ch}
+    .subtitle{margin:14px 0 0;line-height:1.7;color:rgba(226,232,240,0.78);font-size:15px;max-width:60ch}
+    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+    .card{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.014));border-radius:18px;padding:18px;position:relative;overflow:hidden;transition:transform var(--t1),border-color var(--t1),box-shadow var(--t1);cursor:pointer}
+    .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.14);box-shadow:0 16px 32px rgba(0,0,0,0.34)}
+    .card.selected{border-color:rgba(124,92,252,0.42);background:linear-gradient(180deg, rgba(124,92,252,0.14), rgba(59,130,246,0.08));box-shadow:0 18px 40px rgba(59,130,246,0.16)}
+    .card.hebrew.selected{border-color:rgba(234,179,8,0.42);background:linear-gradient(180deg, rgba(234,179,8,0.14), rgba(202,138,4,0.08));box-shadow:0 18px 40px rgba(234,179,8,0.16)}
+    .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .glyph{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:28px;line-height:1;flex:0 0 auto;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden}
+    .glyph span{position:relative;z-index:1}
+    .glyph.hebrew{font-family:"SBL Hebrew","Ezra SIL","Times New Roman",serif;color:#ffe0a8;background:linear-gradient(135deg, rgba(234,179,8,0.18), rgba(202,138,4,0.12))}
+    .glyph.greek{color:#bcd0ff;background:linear-gradient(135deg, rgba(59,130,246,0.18), rgba(124,92,252,0.12))}
+    .lang-name{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:18px;letter-spacing:-0.02em;color:var(--tw)}
+    .lang-sub{margin:3px 0 0;color:rgba(226,232,240,0.62);font-size:12px}
+    .badge{padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:11px;font-weight:800;color:var(--tw);background:rgba(255,255,255,0.04);white-space:nowrap}
+    .badge.greek{color:#bcd0ff;background:rgba(59,130,246,0.10);border-color:rgba(59,130,246,0.22)}
+    .badge.hebrew{color:#ffe0a8;background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.24)}
+    .desc{margin:14px 0 0;color:rgba(226,232,240,0.70);font-size:13px;line-height:1.6}
+    .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    .cta{flex:1 1 240px;min-height:54px;border-radius:18px;padding:0 18px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:transform var(--t1),filter var(--t1),box-shadow var(--t1)}
+    .cta.primary{border:1px solid rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.22), rgba(34,197,94,0.10));color:var(--tw)}
+    .cta.secondary{border:1px solid var(--border2);background:rgba(255,255,255,0.03);color:var(--ts)}
+    .cta:hover{transform:translateY(-2px)}
+    .footer-note{margin-top:8px;font-size:12px;color:rgba(226,232,240,0.5);text-align:center}
+    .auth-loader{position:absolute;inset:0;display:grid;place-items:center;color:rgba(226,232,240,0.8);font-weight:700;letter-spacing:0.02em;background:linear-gradient(180deg, rgba(15,17,23,0.96), rgba(11,14,22,0.98));z-index:20}
+    .spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);border-top-color:var(--purple);animation:spin 0.9s linear infinite;margin:0 auto 12px}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+  </style>
+</head>
+<body data-page="dashboard">
+  <div id="auth-loader" class="auth-loader">
+    <div>
+      <div class="spinner"></div>
+      Loading your language workspace...
+    </div>
+  </div>
+  <div id="app-content" style="display:none">
+    <div id="app">
+      <aside id="sidebar" aria-label="Sidebar navigation">
+        <a class="sbBrand" id="brandLink" href="dashboard.html" aria-label="Dashboard home">
+          <div class="sbLogo" id="brandLogo" aria-hidden="true"><span>🌐</span></div>
+          <div>
+            <div class="sbTitle" id="brandTitle">Biblical Languages</div>
+            <div class="sbSub" id="brandSub">Choose your track</div>
+          </div>
+        </a>
+        <div class="sbGroup">
+          <h3>Main</h3>
+          <nav class="nav">
+            <a class="active" href="language-home.html"><span class="ic">🏠</span><span class="tx">Language Home</span></a>
+            <a href="dashboard.html"><span class="ic">🏛️</span><span class="tx">Greek Dashboard</span></a>
+            <a href="dashboard-hebrew.html"><span class="ic">📜</span><span class="tx">Hebrew Dashboard</span></a>
+          </nav>
+        </div>
+        <div class="sbGroup">
+          <h3>Learn</h3>
+          <nav class="nav">
+            <a href="lessons.html"><span class="ic">📚</span><span class="tx">Greek Lessons</span></a>
+            <a href="lessons-hebrew.html"><span class="ic">📖</span><span class="tx">Hebrew Lessons</span></a>
+          </nav>
+        </div>
+        <div class="sbGroup">
+          <h3>Account</h3>
+          <nav class="nav">
+            <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+            <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+          </nav>
+        </div>
+      </aside>
+      <div id="main-wrapper">
+        <header id="top-bar">
+          <div class="tbLeft">
+            <div class="tbTitle">Select your language track</div>
+            <div class="tbSub">Pick Greek or Hebrew to begin. Your choice persists across the dashboard.</div>
+          </div>
+          <div class="tbRight">
+            <div class="pill"><span>🔥</span><b id="statUser">—</b></div>
+          </div>
+        </header>
+        <main id="content">
+          <div class="page">
+            <div class="hero">
+              <div class="eyebrow"><span class="dot"></span>Track selector</div>
+              <h1 class="title">Biblical Languages</h1>
+              <p class="subtitle">Choose your study path below. Greek is the default track, and Hebrew is available as a full course experience with its own dashboard, lessons, and exercises.</p>
+              <div class="cards">
+                <article class="card greek selected" id="greekCard">
+                  <div class="card-head">
+                    <div>
+                      <div class="lang-name">Greek</div>
+                      <div class="lang-sub">Koine Greek track</div>
+                    </div>
+                    <div class="glyph greek"><span>Ω</span></div>
+                  </div>
+                  <div class="desc">Continue into the Greek dashboard with lesson pacing, streaks, and the familiar track experience.</div>
+                  <div class="badge greek">Active by default</div>
+                </article>
+                <article class="card hebrew" id="hebrewCard">
+                  <div class="card-head">
+                    <div>
+                      <div class="lang-name">Hebrew</div>
+                      <div class="lang-sub">Biblical Hebrew track</div>
+                    </div>
+                    <div class="glyph hebrew"><span>אב</span></div>
+                  </div>
+                  <div class="desc">Switch to the new Hebrew dashboard and lessons built for the standalone Biblical Hebrew track.</div>
+                  <div class="badge hebrew">Standalone track</div>
+                </article>
+              </div>
+              <div class="cta-row">
+                <button class="cta primary" id="continueBtn" type="button">Continue to Greek</button>
+                <button class="cta secondary" id="switchBtn" type="button">Save Greek as active language</button>
+              </div>
+              <div class="footer-note">Your selection is stored locally and used by the dashboard and lesson pages.</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="auth-guard.js"></script>
+  <script>
+    (function () {
+      const greekCard = document.getElementById('greekCard');
+      const hebrewCard = document.getElementById('hebrewCard');
+      const continueBtn = document.getElementById('continueBtn');
+      const switchBtn = document.getElementById('switchBtn');
+      const statUser = document.getElementById('statUser');
+
+      function selectLanguage(lang) {
+        const isGreek = lang === 'greek';
+        greekCard.classList.toggle('selected', isGreek);
+        hebrewCard.classList.toggle('selected', !isGreek);
+        continueBtn.textContent = isGreek ? 'Continue to Greek' : 'Hebrew preview';
+        switchBtn.textContent = isGreek ? 'Save Greek as active language' : 'Save Hebrew as active language';
+        try { localStorage.setItem('activeLanguage', lang); } catch (_) {}
+      }
+
+      greekCard.addEventListener('click', () => selectLanguage('greek'));
+      hebrewCard.addEventListener('click', () => selectLanguage('hebrew'));
+      continueBtn.addEventListener('click', () => {
+        const active = localStorage.getItem('activeLanguage') || 'greek';
+        window.location.href = active === 'hebrew' ? 'dashboard-hebrew.html' : 'dashboard.html';
+      });
+      switchBtn.addEventListener('click', () => {
+        const active = localStorage.getItem('activeLanguage') || 'greek';
+        window.location.href = active === 'hebrew' ? 'dashboard-hebrew.html' : 'dashboard.html';
+      });
+
+      document.addEventListener('authReady', function (ev) {
+        const user = ev && ev.detail ? ev.detail : null;
+        document.getElementById('auth-loader').style.display = 'none';
+        document.getElementById('app-content').style.display = 'grid';
+        if (user) {
+          const name = user.displayName || (user.email ? user.email.split('@')[0] : 'friend');
+          statUser.textContent = name;
+        } else {
+          statUser.textContent = 'Guest';
+        }
+      }, { once: true });
+
+      selectLanguage('greek');
+      try {
+        const saved = localStorage.getItem('activeLanguage');
+        if (saved === 'hebrew' || saved === 'greek') selectLanguage(saved);
+      } catch (_) {}
+
+      if (window.AuthGuard && typeof window.AuthGuard.start === 'function') {
+        window.AuthGuard.start({ loginUrl: 'index.html' });
+      }
+    })();
+  </script>
+</body>
+</html>

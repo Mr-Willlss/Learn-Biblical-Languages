@@ -6,9 +6,11 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7c5cfc">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
-  <title>Leaderboard • Learn Koine Greek</title>
+  <meta name="apple-mobile-web-app-title" content="Biblical Hebrew">
+  <title>Leaderboard • Biblical Hebrew</title>
   <script src="progress-manager.js"></script>
+  <script src="hebrew-lesson-data.js"></script>
+  <script>try { localStorage.setItem('activeLanguage', 'hebrew'); } catch (_) {}</script>
   <script src="language-support.js"></script>
   <style>
     :root{
@@ -38,27 +40,27 @@
     .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
     .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
     .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
-    body[data-page="dashboard"] .nav a[href="dashboard.html"],
     body[data-page="dashboard"] .nav a[href="dashboard-hebrew.html"],
-    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="dashboard"] .nav a[href="dashboard-hebrew.html"],
     body[data-page="practice"] .nav a[href="practice-hebrew.html"],
-    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="practice"] .nav a[href="practice-hebrew.html"],
     body[data-page="lessons"] .nav a[href="lessons-hebrew.html"],
-    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="lessons"] .nav a[href="lessons-hebrew.html"],
     body[data-page="lesson"] .nav a[href="lessons-hebrew.html"],
-    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="lesson"] .nav a[href="lessons-hebrew.html"],
     body[data-page="quests"] .nav a[href="quests-hebrew.html"],
-    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="quests"] .nav a[href="quests-hebrew.html"],
     body[data-page="vocabulary"] .nav a[href="vocabulary-hebrew.html"],
-    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary-hebrew.html"],
     body[data-page="leaderboard"] .nav a[href="leaderboard-hebrew.html"],
-    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard-hebrew.html"],
     body[data-page="rewards"] .nav a[href="rewards-hebrew.html"],
-    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="rewards"] .nav a[href="rewards-hebrew.html"],
     body[data-page="friends"] .nav a[href="friends-hebrew.html"],
-    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="friends"] .nav a[href="friends-hebrew.html"],
     body[data-page="study-room"] .nav a[href="study-room-hebrew.html"],
-    body[data-page="profile"] .nav a[href="profile.html"],
+    body[data-page="study-room"] .nav a[href="study-room-hebrew.html"],
+    body[data-page="profile"] .nav a[href="profile.html?lang=hebrew"],
     body[data-page="profile"] .nav a[href="profile.html?lang=hebrew"]{
       background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
       border-color:rgba(124,92,252,0.3);
@@ -127,17 +129,17 @@
     .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
     .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
     .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
-    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
     body[data-page="dashboard"] .bottomTabs a[href="dashboard-hebrew.html"],
-    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard-hebrew.html"],
     body[data-page="practice"] .bottomTabs a[href="practice-hebrew.html"],
-    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice-hebrew.html"],
     body[data-page="lessons"] .bottomTabs a[href="lessons-hebrew.html"],
-    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons-hebrew.html"],
     body[data-page="lesson"] .bottomTabs a[href="lessons-hebrew.html"],
-    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons-hebrew.html"],
     body[data-page="friends"] .bottomTabs a[href="friends-hebrew.html"],
-    body[data-page="profile"] .bottomTabs a[href="profile.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends-hebrew.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html?lang=hebrew"],
     body[data-page="profile"] .bottomTabs a[href="profile.html?lang=hebrew"]{
       border-color:rgba(124,92,252,0.35);
       background:rgba(124,92,252,0.10);
@@ -166,42 +168,41 @@
   <div id="app-content" style="display:none">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
-      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
-        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+      <a class="sbBrand" href="dashboard-hebrew.html" aria-label="Biblical Hebrew home">
+        <div class="sbLogo" aria-hidden="true"><span>אב</span></div>
         <div>
-          <div class="sbTitle">Koine Greek</div>
+          <div class="sbTitle">Biblical Hebrew</div>
 
         </div>
       </a>
       <div class="sbGroup">
         <h3>Main</h3>
         <nav class="nav">
-          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
-          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
-          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
-          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+          <a href="dashboard-hebrew.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice-hebrew.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons-hebrew.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests-hebrew.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Learn</h3>
         <nav class="nav">
-          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
-          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
-          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+          <a href="vocabulary-hebrew.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard-hebrew.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards-hebrew.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Social</h3>
         <nav class="nav">
-          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
-          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+          <a href="friends-hebrew.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room-hebrew.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Account</h3>
         <nav class="nav">
-          <a href="language-home.html"><span class="ic">🌐</span><span class="tx">Switch Language</span></a>
-          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html?lang=hebrew"><span class="ic">👤</span><span class="tx">Profile</span></a>
           <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
           <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
         </nav>
@@ -239,7 +240,7 @@
             <div class="sub">Top Speed Round scores for today.</div>
             <div class="list" id="practiceList"></div>
             <div style="margin-top:12px">
-              <a class="btn" href="practice.html">Play Speed Round →</a>
+              <a class="btn" href="practice-hebrew.html">Play Speed Round →</a>
             </div>
           </section>
         </div>
@@ -249,11 +250,11 @@
 
   <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
     <div class="tabs">
-      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
-      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
-      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
-      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
-      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+      <a class="tab" href="dashboard-hebrew.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice-hebrew.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons-hebrew.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends-hebrew.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html?lang=hebrew"><div>👤</div><div>Profile</div></a>
     </div>
   </div>
 
@@ -378,7 +379,7 @@
         try { window.applyLanguageLinks(); } catch(_) {}
       }
       const lang = window.getActiveLanguage ? window.getActiveLanguage() : 'greek';
-      const langLabel = window.getLanguageLabel ? window.getLanguageLabel(lang) : (lang === 'hebrew' ? 'Biblical Hebrew' : 'Koine Greek');
+      const langLabel = window.getLanguageLabel ? window.getLanguageLabel(lang) : (lang === 'hebrew' ? 'Biblical Hebrew' : 'Biblical Hebrew');
       document.title = `Leaderboard • ${langLabel}`;
       const brandTitle = document.querySelector('.sbTitle');
       const brandSub = document.querySelector('.sbSub');

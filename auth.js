@@ -5,7 +5,26 @@ const authState = {
 
 function getScopedProgressKey(uid) {
   const id = String(uid || "").trim();
-  return id ? `greekQuestProgress:${id}` : "greekQuestProgress:signedout";
+  if (window.ProgressManager && typeof window.ProgressManager.getStorageKey === "function") {
+    const prevScope = window.gqProgressActiveUid;
+    const prevLang = window.getLanguage ? window.getLanguage() : (localStorage.getItem("activeLanguage") || "greek");
+    if (typeof window.setProgressScope === "function") {
+      try { window.setProgressScope(id); } catch (_) {}
+    }
+    if (typeof window.setLanguageScope === "function") {
+      try { window.setLanguageScope(localStorage.getItem("activeLanguage") || prevLang || "greek"); } catch (_) {}
+    }
+    const key = window.ProgressManager.getStorageKey();
+    if (typeof window.setProgressScope === "function") {
+      try { window.setProgressScope(prevScope || ""); } catch (_) {}
+    }
+    if (typeof window.setLanguageScope === "function") {
+      try { window.setLanguageScope(prevLang || "greek"); } catch (_) {}
+    }
+    return key;
+  }
+  const lang = String(localStorage.getItem("activeLanguage") || "greek").trim().toLowerCase() === "hebrew" ? "hebrew" : "greek";
+  return `biblicalLang:${lang}:${id || "signedout"}`;
 }
 
 function setActiveProgressScope(uid) {
@@ -180,11 +199,12 @@ function loadRemoteProgress(uid) {
     window.gqProgressHydrated = true;
     return;
   }
+  const lang = String(localStorage.getItem("activeLanguage") || (typeof window.getLanguage === "function" ? window.getLanguage() : "greek")).trim().toLowerCase() === "hebrew" ? "hebrew" : "greek";
   const key = getScopedProgressKey(uid);
   db.collection("users")
     .doc(uid)
     .collection("private")
-    .doc("progress")
+    .doc(`progress_${lang}`)
     .get()
     .then((doc) => {
       if (doc.exists) {
@@ -227,11 +247,12 @@ function saveRemoteProgress(uid) {
     return;
   }
   const payload = typeof getRemoteProgressPayload === "function" ? getRemoteProgressPayload() : getProgressPayload();
+  const lang = String(localStorage.getItem("activeLanguage") || (typeof window.getLanguage === "function" ? window.getLanguage() : "greek")).trim().toLowerCase() === "hebrew" ? "hebrew" : "greek";
   const key = getScopedProgressKey(uid);
   try {
     localStorage.setItem(key, JSON.stringify(payload));
   } catch (_) {}
-  db.collection("users").doc(uid).collection("private").doc("progress").set(payload, { merge: true });
+  db.collection("users").doc(uid).collection("private").doc(`progress_${lang}`).set(payload, { merge: true });
 }
 
 function syncProgress() {

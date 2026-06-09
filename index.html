@@ -375,7 +375,7 @@
       if (auth) {
         auth.onAuthStateChanged(function(user){
           if (user) {
-            window.location.href = 'dashboard.html';
+            window.location.href = 'language-home.html';
           } else {
             show(card);
           }
@@ -395,7 +395,7 @@
           if (!user) throw new Error("Sign-in failed. Please try again.");
 
           await ensureUserDoc(user);
-          window.location.href = 'dashboard.html';
+          window.location.href = 'language-home.html';
         }catch(e){
           console.error(e);
           setErr(e && e.message ? e.message : "Could not sign in. Please try again.");
@@ -481,7 +481,7 @@
           const user = cred && cred.user;
           if (!user) throw new Error('Sign-in failed. Please try again.');
           await ensureUserDoc(user);
-          window.location.href = 'dashboard.html';
+          window.location.href = 'language-home.html';
         }catch(err){
           console.error(err);
           setEmailErr(mapAuthError(err));

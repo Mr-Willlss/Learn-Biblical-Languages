@@ -18,6 +18,11 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      match /private/{docId} {
+        allow read, write: if isOwner(uid)
+          && (docId == "progress" || docId == "progress_greek" || docId == "progress_hebrew");
+      }
+
       match /activity/{activityId} {
         allow read, write: if isOwner(uid);
       }

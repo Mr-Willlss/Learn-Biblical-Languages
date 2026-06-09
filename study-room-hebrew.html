@@ -6,9 +6,10 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7c5cfc">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
-  <title>Leaderboard • Learn Koine Greek</title>
-  <script src="progress-manager.js"></script>
+  <meta name="apple-mobile-web-app-title" content="Biblical Hebrew">
+  <title>Study Room • Biblical Hebrew</title>
+  <script src="hebrew-lesson-data.js"></script>
+  <script>try { localStorage.setItem('activeLanguage', 'hebrew'); } catch (_) {}</script>
   <script src="language-support.js"></script>
   <style>
     :root{
@@ -24,7 +25,8 @@
     html,body{height:100%}
     body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
     a{color:inherit;text-decoration:none}
-    button{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    button,input,select{font:inherit}
+    button{appearance:none;border:0;background:none;color:inherit;cursor:pointer}
     #app{min-height:100%;display:flex}
     #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
     .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
@@ -38,27 +40,27 @@
     .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
     .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
     .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
-    body[data-page="dashboard"] .nav a[href="dashboard.html"],
     body[data-page="dashboard"] .nav a[href="dashboard-hebrew.html"],
-    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="dashboard"] .nav a[href="dashboard-hebrew.html"],
     body[data-page="practice"] .nav a[href="practice-hebrew.html"],
-    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="practice"] .nav a[href="practice-hebrew.html"],
     body[data-page="lessons"] .nav a[href="lessons-hebrew.html"],
-    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="lessons"] .nav a[href="lessons-hebrew.html"],
     body[data-page="lesson"] .nav a[href="lessons-hebrew.html"],
-    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="lesson"] .nav a[href="lessons-hebrew.html"],
     body[data-page="quests"] .nav a[href="quests-hebrew.html"],
-    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="quests"] .nav a[href="quests-hebrew.html"],
     body[data-page="vocabulary"] .nav a[href="vocabulary-hebrew.html"],
-    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary-hebrew.html"],
     body[data-page="leaderboard"] .nav a[href="leaderboard-hebrew.html"],
-    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard-hebrew.html"],
     body[data-page="rewards"] .nav a[href="rewards-hebrew.html"],
-    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="rewards"] .nav a[href="rewards-hebrew.html"],
     body[data-page="friends"] .nav a[href="friends-hebrew.html"],
-    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="friends"] .nav a[href="friends-hebrew.html"],
     body[data-page="study-room"] .nav a[href="study-room-hebrew.html"],
-    body[data-page="profile"] .nav a[href="profile.html"],
+    body[data-page="study-room"] .nav a[href="study-room-hebrew.html"],
+    body[data-page="profile"] .nav a[href="profile.html?lang=hebrew"],
     body[data-page="profile"] .nav a[href="profile.html?lang=hebrew"]{
       background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
       border-color:rgba(124,92,252,0.3);
@@ -78,23 +80,34 @@
     .miniName{display:flex;flex-direction:column;line-height:1.1}
     .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
     .miniName .l{color:var(--tm);font-size:11px}
-    #content{padding:14px;max-width:1000px;width:100%;margin:0 auto}
+    #content{padding:14px;max-width:1100px;width:100%;margin:0 auto}
 
-    .cols{display:grid;grid-template-columns:1.2fr 0.8fr;gap:10px;margin-top:8px}
     .panel{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));border-radius:22px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,0.25);overflow:hidden}
     .h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:16px}
     .sub{margin-top:6px;color:var(--tm);font-size:12px;line-height:1.45}
-    .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:rgba(0,0,0,0.18);border-radius:16px;padding:10px}
-    .left{display:flex;align-items:center;gap:10px;min-width:0}
-    .pAv{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);display:grid;place-items:center;overflow:hidden;flex:0 0 auto}
-    .pAv img{width:100%;height:100%;object-fit:cover}
-    .nm{font-weight:900;color:var(--tw);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .meta{color:var(--tm);font-size:11px}
-    .right{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-    .badge{padding:7px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .input{flex:1 1 240px;min-width:220px;padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg-input);color:var(--ts);outline:none}
+    .select{padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg-input);color:var(--ts);outline:none}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);font-weight:900;color:var(--tw)}
     .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+    .btnDanger{border-color:rgba(239,68,68,0.45);background:rgba(239,68,68,0.10)}
+    .btnDanger:hover{border-color:rgba(239,68,68,0.75);box-shadow:0 18px 35px rgba(239,68,68,0.12)}
+
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .members{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .mChip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,0.18);font-size:12px}
+    .mChip img{width:18px;height:18px;border-radius:6px;object-fit:cover}
+
+    .chat{margin-top:10px;border:1px solid var(--border);background:rgba(0,0,0,0.18);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;height:320px}
+    .msgs{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+    .msg{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:8px 10px;max-width:85%}
+    .msg.me{align-self:flex-end;border-color:rgba(124,92,252,0.3);background:rgba(124,92,252,0.10)}
+    .msg .n{font-weight:900;color:var(--tw);font-size:11px}
+    .msg .t{color:rgba(226,232,240,0.9);font-size:12px;line-height:1.4;margin-top:2px;word-break:break-word}
+    .msg .d{color:var(--tm);font-size:10px;margin-top:4px}
+    .chatBar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);background:rgba(15,17,23,0.55)}
 
     .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
     .toast{pointer-events:auto;max-width:min(560px,100%);border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px;box-shadow:0 22px 40px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:transform var(--t2), opacity var(--t2)}
@@ -127,17 +140,17 @@
     .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
     .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
     .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
-    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
     body[data-page="dashboard"] .bottomTabs a[href="dashboard-hebrew.html"],
-    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard-hebrew.html"],
     body[data-page="practice"] .bottomTabs a[href="practice-hebrew.html"],
-    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice-hebrew.html"],
     body[data-page="lessons"] .bottomTabs a[href="lessons-hebrew.html"],
-    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons-hebrew.html"],
     body[data-page="lesson"] .bottomTabs a[href="lessons-hebrew.html"],
-    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons-hebrew.html"],
     body[data-page="friends"] .bottomTabs a[href="friends-hebrew.html"],
-    body[data-page="profile"] .bottomTabs a[href="profile.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends-hebrew.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html?lang=hebrew"],
     body[data-page="profile"] .bottomTabs a[href="profile.html?lang=hebrew"]{
       border-color:rgba(124,92,252,0.35);
       background:rgba(124,92,252,0.10);
@@ -161,47 +174,46 @@
     }
   </style>
 </head>
-<body data-page="leaderboard">
+<body data-page="study-room">
   <div id="auth-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;z-index:9999"><p style="color:white;font-size:1.2rem">Loading...</p></div>
   <div id="app-content" style="display:none">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
-      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
-        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+      <a class="sbBrand" href="dashboard-hebrew.html" aria-label="Biblical Hebrew home">
+        <div class="sbLogo" aria-hidden="true"><span>אב</span></div>
         <div>
-          <div class="sbTitle">Koine Greek</div>
+          <div class="sbTitle">Biblical Hebrew</div>
 
         </div>
       </a>
       <div class="sbGroup">
         <h3>Main</h3>
         <nav class="nav">
-          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
-          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
-          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
-          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+          <a href="dashboard-hebrew.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice-hebrew.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons-hebrew.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests-hebrew.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Learn</h3>
         <nav class="nav">
-          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
-          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
-          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+          <a href="vocabulary-hebrew.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard-hebrew.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards-hebrew.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Social</h3>
         <nav class="nav">
-          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
-          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+          <a href="friends-hebrew.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room-hebrew.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
         </nav>
       </div>
       <div class="sbGroup">
         <h3>Account</h3>
         <nav class="nav">
-          <a href="language-home.html"><span class="ic">🌐</span><span class="tx">Switch Language</span></a>
-          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html?lang=hebrew"><span class="ic">👤</span><span class="tx">Profile</span></a>
           <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
           <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
         </nav>
@@ -211,8 +223,8 @@
     <div id="main-wrapper">
       <header id="top-bar">
         <div class="tbLeft">
-          <div class="tbTitle">Leaderboard</div>
-          <div class="tbSub">Global XP • Today’s practice scores</div>
+          <div class="tbTitle">Study Room</div>
+          <div class="tbSub">Create or join a live room • Chat • XP +10% (lesson-player)</div>
         </div>
         <div class="tbRight">
           <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
@@ -228,32 +240,61 @@
         </div>
       </header>
       <main id="content">
-        <div class="cols">
-          <section class="panel">
-            <h1 class="h1">Global XP</h1>
-            <div class="sub">Top learners by total XP.</div>
-            <div class="list" id="xpList"></div>
-          </section>
-          <section class="panel">
-            <h1 class="h1">Practice (Today)</h1>
-            <div class="sub">Top Speed Round scores for today.</div>
-            <div class="list" id="practiceList"></div>
-            <div style="margin-top:12px">
-              <a class="btn" href="practice.html">Play Speed Round →</a>
+        <section class="panel" id="lobby">
+          <h1 class="h1">Lobby</h1>
+          <div class="sub">Create a room code or join a friend’s room.</div>
+          <div class="row">
+            <button class="btn btnPrimary" id="createBtn" type="button">Create Room</button>
+            <input class="input" id="codeInput" placeholder="Enter 6-character code…" maxlength="6" />
+            <button class="btn" id="joinBtn" type="button">Join Room</button>
+          </div>
+          <div class="sub" id="lobbyNote" style="margin-top:10px">Sign-in required for study rooms.</div>
+        </section>
+
+        <section class="panel" id="roomPanel" style="display:none;margin-top:10px">
+          <h1 class="h1" id="roomTitle">Room</h1>
+          <div class="sub" id="roomSub">Loading…</div>
+          <div class="row">
+            <span class="pill">Code: <b id="roomCode">—</b></span>
+            <span class="pill">Status: <b id="roomStatus">—</b></span>
+            <button class="btn btnDanger" id="leaveBtn" type="button">Leave</button>
+          </div>
+          <div class="members" id="members"></div>
+          <div class="cols">
+            <div>
+              <div class="row">
+                <select class="select" id="lessonPick" aria-label="Pick lesson">
+                  ${Array.from({length:24},(_,i)=>`<option value="${i+1}">Lesson ${i+1}</option>`).join('')}
+                </select>
+                <button class="btn btnPrimary" id="setLessonBtn" type="button">Set Lesson</button>
+                <a class="btn" id="startLessonBtn" href="lessons-hebrew.html">Start Lesson Together →</a>
+              </div>
+              <div class="sub">Host sets the current lesson. Everyone starts from the same link.</div>
+              <div class="sub" style="margin-top:6px">Room auto-closes after 2 hours.</div>
             </div>
-          </section>
-        </div>
+            <div>
+              <div class="chat" aria-label="Chat">
+                <div class="msgs" id="msgs"></div>
+                <div class="chatBar">
+                  <input class="input" id="chatInput" placeholder="Message (max 100 chars)…" maxlength="100" />
+                  <button class="btn btnPrimary" id="sendBtn" type="button">Send</button>
+                </div>
+              </div>
+              <div class="sub" style="margin-top:8px">Chat uses Firebase Realtime Database.</div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
 
   <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
     <div class="tabs">
-      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
-      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
-      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
-      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
-      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+      <a class="tab" href="dashboard-hebrew.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice-hebrew.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons-hebrew.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends-hebrew.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html?lang=hebrew"><div>👤</div><div>Profile</div></a>
     </div>
   </div>
 
@@ -279,6 +320,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="auth-guard.js"></script>
 
   <script>
@@ -319,6 +361,12 @@
         location.href = 'index.html';
       });
     }
+    function randCode(){
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let s = '';
+      for (let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+      return s;
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
@@ -330,12 +378,12 @@
       measurementId: "G-6BYGXRJFT",
       databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
     };
-    let auth=null, db=null;
+    let auth=null, db=null, rtdb=null;
     function initFirebase(){
       if (!window.firebase) return false;
       if (firebase.apps && firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
       if (!firebase.apps) firebase.initializeApp(firebaseConfig);
-      auth=firebase.auth(); db=firebase.firestore(); return true;
+      auth=firebase.auth(); db=firebase.firestore(); rtdb=firebase.database ? firebase.database() : null; return true;
     }
 
     function setTopUser(user, data) {
@@ -350,112 +398,186 @@
       if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
     }
 
-    function renderRow(host, rank, d, valueLabel) {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const avUrl = d.photoURL || '';
-      row.innerHTML = `
-        <div class="left">
-          <div class="badge">#${rank}</div>
-          <div class="pAv">${avUrl ? `<img alt="avatar" src="${avUrl}">` : '👤'}</div>
-          <div style="min-width:0">
-            <div class="nm">${d.displayName || 'Scholar'}</div>
-            <div class="meta">${d.rank || ''} • Level ${d.level || 1} • 🔥 ${d.streak || 0}</div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="badge">${valueLabel}</div>
-        </div>
-      `;
-      host.appendChild(row);
+    function showLobby(show){
+      document.getElementById('lobby').style.display = show ? '' : 'none';
+      document.getElementById('roomPanel').style.display = show ? 'none' : '';
     }
 
-    async function initPage(user) {
-      if (window.setLanguageScope) {
-        try { window.setLanguageScope(window.getActiveLanguage ? window.getActiveLanguage() : 'greek'); } catch(_) {}
-      }
-      if (window.applyLanguageLinks) {
-        try { window.applyLanguageLinks(); } catch(_) {}
-      }
+    function qs(key){ return new URL(location.href).searchParams.get(key); }
+
+    async function initPage(user){
       const lang = window.getActiveLanguage ? window.getActiveLanguage() : 'greek';
-      const langLabel = window.getLanguageLabel ? window.getLanguageLabel(lang) : (lang === 'hebrew' ? 'Biblical Hebrew' : 'Koine Greek');
-      document.title = `Leaderboard • ${langLabel}`;
+      const langLabel = window.getLanguageLabel ? window.getLanguageLabel(lang) : (lang === 'hebrew' ? 'Biblical Hebrew' : 'Biblical Hebrew');
+      document.title = `Study Room • ${langLabel}`;
       const brandTitle = document.querySelector('.sbTitle');
       const brandSub = document.querySelector('.sbSub');
       const brandLink = document.querySelector('.sbBrand');
       if (brandTitle) brandTitle.textContent = langLabel;
       if (brandSub) brandSub.textContent = langLabel;
-      if (brandLink) brandLink.href = lang === 'hebrew' ? 'dashboard-hebrew.html' : 'dashboard.html';
+      if (brandLink) brandLink.href = lang === 'hebrew' ? 'dashboard-hebrew.html?lang=hebrew' : 'dashboard.html';
+      if (window.applyLanguageScope) {
+        try { window.applyLanguageScope(); } catch(_) {}
+      }
+      if (window.applyLanguageLinks) {
+        try { window.applyLanguageLinks(); } catch(_) {}
+      }
       wireSignOut(user);
-      const xpList = document.getElementById('xpList');
-      const practiceList = document.getElementById('practiceList');
-      xpList.innerHTML = `<div class="sub">Loading…</div>`;
-      practiceList.innerHTML = `<div class="sub">Loading…</div>`;
-
-      const today = new Date().toISOString().split('T')[0];
-      const currentName = (user && (user.displayName || user.email)) || localStorage.getItem('koine_current_user') || 'Samuel Williams';
-      const myXp = (window.getTotalXP ? getTotalXP() : 0);
-
-      // Try Firebase first (if signed in), but always fall back gracefully.
-      let usedFirebase = false;
-      if (user && db) {
-        try{
-          const uSnap = await db.collection('users').doc(user.uid).get();
-          const uData = uSnap.exists ? (uSnap.data() || {}) : {};
-          setTopUser(user, uData);
-        }catch(_){
-          setTopUser(user, { xp: myXp, streak:0, hearts:5 });
-        }
-
-        try{
-          const qs = await db.collection('leaderboard').orderBy('xp','desc').limit(25).get();
-          xpList.innerHTML = '';
-          let rank = 1;
-          qs.forEach(doc => { const d = doc.data() || {}; renderRow(xpList, rank++, d, `${d.xp || 0} XP`); });
-          if (qs.size) usedFirebase = true;
-        }catch(_){}
-
-        try{
-          const qs = await db.collection('practiceScores').where('date','==',today).orderBy('score','desc').limit(20).get();
-          practiceList.innerHTML = '';
-          let rank = 1;
-          qs.forEach(doc => { const d = doc.data() || {}; renderRow(practiceList, rank++, d, `${d.score || 0}`); });
-          if (qs.size) usedFirebase = true;
-        }catch(_){}
-      } else {
-        setTopUser(null, { xp: myXp, streak:0, hearts:5 });
+      const note = document.getElementById('lobbyNote');
+      if (!user) {
+        setTopUser(null, { hearts:5, streak:0 });
+        note.textContent = "Sign-in required for study rooms.";
+        document.getElementById('createBtn').disabled = true;
+        document.getElementById('joinBtn').disabled = true;
+        document.getElementById('codeInput').disabled = true;
+        showLobby(true);
+        return;
       }
 
-      // Local XP leaderboard fallback
-      if (!usedFirebase || !xpList.children.length) {
-        xpList.innerHTML = '';
-        const users = [];
-        Object.keys(localStorage).forEach(k => {
-          if (!k.startsWith('koine_user_')) return;
-          try{
-            const u = JSON.parse(localStorage.getItem(k) || '{}');
-            if (u && typeof u === 'object') users.push(u);
-          }catch(_){}
+      const uSnap = await db.collection('users').doc(user.uid).get();
+      const uData = uSnap.exists ? (uSnap.data() || {}) : {};
+      setTopUser(user, uData);
+      note.textContent = "Create a room and share the code with friends.";
+
+      let roomUnsub = null;
+      let chatUnsub = null;
+      let currentRoomCode = null;
+
+      async function leaveRoom() {
+        if (!currentRoomCode) return;
+        try{
+          const ref = db.collection('studyRooms').doc(currentRoomCode);
+          await ref.set({ members: firebase.firestore.FieldValue.arrayRemove(user.uid) }, { merge:true });
+        }catch(e){ console.warn(e); }
+        if (roomUnsub) { roomUnsub(); roomUnsub = null; }
+        if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+        currentRoomCode = null;
+        history.replaceState({}, '', 'study-room.html');
+        showLobby(true);
+      }
+
+      document.getElementById('leaveBtn').addEventListener('click', leaveRoom);
+
+      async function openRoom(code) {
+        const ref = db.collection('studyRooms').doc(code);
+        const snap = await ref.get();
+        if (!snap.exists) { showToast("Room not found.", "bad", "Join failed"); return; }
+        // join
+        await ref.set({ members: firebase.firestore.FieldValue.arrayUnion(user.uid) }, { merge:true });
+        currentRoomCode = code;
+        history.replaceState({}, '', `study-room.html?room=${encodeURIComponent(code)}`);
+        showLobby(false);
+
+        if (roomUnsub) roomUnsub();
+        roomUnsub = ref.onSnapshot(async (doc) => {
+          if (!doc.exists) { showToast("Room closed.", "info", "Room"); leaveRoom(); return; }
+          const data = doc.data() || {};
+          const createdAt = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : (typeof data.createdAtMs === 'number' ? data.createdAtMs : Date.now());
+          const expired = (Date.now() - createdAt) > (2 * 60 * 60 * 1000);
+          if (expired && data.status !== 'finished') {
+            await ref.set({ status:'finished' }, { merge:true }).catch(()=>{});
+          }
+          document.getElementById('roomTitle').textContent = `Room ${code}`;
+          document.getElementById('roomSub').textContent = data.host === user.uid ? "You are the host." : "You are a member.";
+          document.getElementById('roomCode').textContent = code;
+          document.getElementById('roomStatus').textContent = data.status || 'waiting';
+          document.getElementById('lessonPick').value = String(data.currentLesson || 1);
+          const langQuery = (window.getActiveLanguage && window.getActiveLanguage() === 'hebrew') ? '&lang=hebrew' : '';
+          document.getElementById('startLessonBtn').href = `${window.getActiveLanguage && window.getActiveLanguage() === 'hebrew' ? 'lesson-hebrew.html' : 'lesson-player.html'}?lesson=${encodeURIComponent(data.currentLesson || 1)}${langQuery}&room=${encodeURIComponent(code)}`;
+
+          const members = Array.isArray(data.members) ? data.members : [];
+          const host = document.getElementById('members');
+          host.innerHTML = '';
+          if (!members.length) host.innerHTML = '<span class="pill">No members</span>';
+          else {
+            const snaps = await Promise.all(members.slice(0, 12).map(uid => db.collection('users').doc(uid).get().catch(()=>null)));
+            snaps.filter(Boolean).forEach(s => {
+              if (!s || !s.exists) return;
+              const u = s.data() || {};
+              const chip = document.createElement('div');
+              chip.className = 'mChip';
+              chip.innerHTML = `${u.photoURL ? `<img alt="av" src="${u.photoURL}">` : '👤'} <b style="color:var(--tw)">${u.displayName || 'Scholar'}</b>`;
+              host.appendChild(chip);
+            });
+          }
         });
-        if (!users.length) users.push({ displayName: currentName, xp: myXp, level: 1, rank:'Newcomer', streak:0, photoURL:'' });
-        users.sort((a,b) => (Number(b.xp||0) - Number(a.xp||0)));
-        users.slice(0, 25).forEach((u, idx) => renderRow(xpList, idx+1, u, `${Number(u.xp||0)} XP`));
+
+        // Chat
+        const msgs = document.getElementById('msgs');
+        msgs.innerHTML = '';
+        if (!rtdb) {
+          showToast("Realtime DB not available. Chat disabled.", "bad", "Chat");
+          return;
+        }
+        const chatRef = rtdb.ref(`studyRooms/${code}/chat`);
+        // simple listener
+        chatRef.limitToLast(60).on('child_added', (snap) => {
+          const m = snap.val() || {};
+          const div = document.createElement('div');
+          div.className = 'msg' + (m.uid === user.uid ? ' me' : '');
+          const when = m.ts ? new Date(m.ts).toLocaleTimeString() : '';
+          div.innerHTML = `<div class="n">${m.name || 'Scholar'}</div><div class="t">${(m.msg || '').slice(0,100)}</div><div class="d">${when}</div>`;
+          msgs.appendChild(div);
+          msgs.scrollTop = msgs.scrollHeight;
+        });
+        chatUnsub = () => chatRef.off();
+
+        const send = async () => {
+          const input = document.getElementById('chatInput');
+          const msg = (input.value || '').trim();
+          if (!msg) return;
+          input.value = '';
+          try{
+            await chatRef.push({
+              uid: user.uid,
+              name: uData.displayName || user.displayName || user.email || 'Scholar',
+              msg: msg.slice(0,100),
+              ts: Date.now()
+            });
+          }catch(e){
+            console.error(e);
+            showToast("Could not send message.", "bad", "Chat");
+          }
+        };
+        document.getElementById('sendBtn').onclick = send;
+        document.getElementById('chatInput').onkeydown = (e)=>{ if (e.key==='Enter') send(); };
+
+        document.getElementById('setLessonBtn').onclick = async () => {
+          const pick = parseInt(document.getElementById('lessonPick').value || '1', 10);
+          try{
+            const d = await ref.get();
+            const data = d.exists ? (d.data() || {}) : {};
+            if (data.host !== user.uid) { showToast("Only the host can set the lesson.", "bad", "Host only"); return; }
+            await ref.set({ currentLesson: pick, status:'waiting' }, { merge:true });
+            showToast(`Set lesson to ${pick}.`, "good", "Room");
+          }catch(e){ console.error(e); showToast("Could not set lesson.", "bad", "Room"); }
+        };
       }
 
-      // Local practice today fallback
-      if (!usedFirebase || !practiceList.children.length) {
-        practiceList.innerHTML = '';
-        const key = `koine_practice_${today}`;
-        let rows = [];
-        try{ rows = JSON.parse(localStorage.getItem(key) || '[]'); }catch(_){ rows = []; }
-        if (!Array.isArray(rows)) rows = [];
-        if (!rows.length) {
-          practiceList.innerHTML = `<div class="sub">No scores yet today. Play a Speed Round to set the pace.</div>`;
-        } else {
-          rows.sort((a,b)=>Number(b.score||0)-Number(a.score||0));
-          rows.slice(0, 20).forEach((r, idx) => renderRow(practiceList, idx+1, { displayName: r.name || currentName, photoURL:'', rank:'', level:1, streak:0 }, `${Number(r.score||0)}`));
-        }
-      }
+      document.getElementById('createBtn').addEventListener('click', async () => {
+        try{
+          const code = randCode();
+          const ref = db.collection('studyRooms').doc(code);
+          await ref.set({
+            host: user.uid,
+            members: [user.uid],
+            currentLesson: 1,
+            status: 'waiting',
+            createdAt: firebase.firestore.Timestamp.now()
+          }, { merge:true });
+          showToast(`Room created: ${code}`, "good", "Room");
+          openRoom(code);
+        }catch(e){ console.error(e); showToast("Could not create room.", "bad", "Room"); }
+      });
+      document.getElementById('joinBtn').addEventListener('click', async () => {
+        const code = (document.getElementById('codeInput').value || '').trim().toUpperCase();
+        if (code.length !== 6) { showToast("Enter a 6-character code.", "bad", "Join"); return; }
+        openRoom(code);
+      });
+
+      // auto-open if param
+      const code = qs('room');
+      if (code && code.length === 6) openRoom(code.toUpperCase());
+      else showLobby(true);
     }
 
     (function boot(){

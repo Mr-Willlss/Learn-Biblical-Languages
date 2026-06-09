@@ -359,6 +359,7 @@ Top 5 research findings applied (2024–2025):
       <div class="sbGroup">
         <h3>Account</h3>
         <nav class="nav">
+          <a href="language-home.html"><span class="ic">🌐</span><span class="tx">Switch Language</span></a>
           <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
           <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
           <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
@@ -582,7 +583,8 @@ Top 5 research findings applied (2024–2025):
         continueBtn.textContent = `Continue → ${lessonTitle || ('Lesson ' + lessonNum)}`;
       }
       const chips = document.querySelectorAll('.meta .chip');
-      if (chips[0]) chips[0].innerHTML = `<b>Lesson ${lessonNum}</b> of 24 — World <b>${worldNum}</b>`;
+      const maxLesson = window.getLessonMax ? window.getLessonMax() : 24;
+      if (chips[0]) chips[0].innerHTML = `<b>Lesson ${lessonNum}</b> of ${maxLesson} — World <b>${worldNum}</b>`;
       if (chips[1]) chips[1].innerHTML = `<b>Next</b>: ${lessonTitle || 'Continue your path'}`;
       chips.forEach(c => c.classList.remove('skel'));
     }
@@ -834,6 +836,9 @@ Top 5 research findings applied (2024–2025):
     }
 
     async function loadUserDashboard(user) {
+      if (window.setLanguageScope) {
+        try { window.setLanguageScope('greek'); } catch(_) {}
+      }
       wireSignOut(user);
       if (user && db) setupNotificationCenter(user);
       const goalBar = document.getElementById('goalBar');

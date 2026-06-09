@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Profile • Learn Koine Greek</title>
   <script src="progress-manager.js"></script>
+  <script src="language-support.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -454,6 +455,21 @@
     function showOverlay(show){ document.getElementById('overlay').classList.toggle('show', !!show); }
 
     async function initPage(user){
+      const lang = window.getActiveLanguage ? window.getActiveLanguage() : 'greek';
+      const langLabel = window.getLanguageLabel ? window.getLanguageLabel(lang) : (lang === 'hebrew' ? 'Biblical Hebrew' : 'Koine Greek');
+      document.title = `Profile • ${langLabel}`;
+      const brandTitle = document.querySelector('.sbTitle');
+      const brandSub = document.querySelector('.sbSub');
+      const brandLink = document.querySelector('.sbBrand');
+      if (brandTitle) brandTitle.textContent = langLabel;
+      if (brandSub) brandSub.textContent = langLabel;
+      if (brandLink) brandLink.href = lang === 'hebrew' ? 'dashboard-hebrew.html?lang=hebrew' : 'dashboard.html';
+      if (window.applyLanguageScope) {
+        try { window.applyLanguageScope(); } catch(_) {}
+      }
+      if (window.applyLanguageLinks) {
+        try { window.applyLanguageLinks(); } catch(_) {}
+      }
       wireSignOut(user);
       const editBtn = document.getElementById('editBtn');
       const signBtn = document.getElementById('signBtn');
@@ -561,7 +577,7 @@
             if (typeof window.clearProgress === 'function') await window.clearProgress(user.uid);
             else if (window.Progress && typeof window.Progress.clearProgress === 'function') await window.Progress.clearProgress(user.uid);
             showToast("Progress cleared. Starting over from Lesson 1.", "good", "Reset");
-            location.href = 'lesson-player.html?lesson=1';
+            location.href = `${(window.getActiveLanguage && window.getActiveLanguage() === 'hebrew') ? 'lesson-hebrew.html' : 'lesson-player.html'}?lesson=1${(window.getActiveLanguage && window.getActiveLanguage() === 'hebrew') ? '&lang=hebrew' : ''}`;
           }catch(e){
             console.error(e);
             showToast("Could not clear progress.", "bad", "Reset");

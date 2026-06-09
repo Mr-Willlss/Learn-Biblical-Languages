@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Biblical Hebrew">
+  <title>Lesson • Biblical Hebrew</title>
+  <style>
+    html,body{height:100%;margin:0;background:#0f1117}
+    body{overflow:hidden}
+    .frame{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:#0f1117}
+    .fallback{position:fixed;inset:0;display:grid;place-items:center;color:#e2e8f0;font-family:system-ui,sans-serif;padding:24px;text-align:center}
+    .fallback a{color:#fff}
+  </style>
+</head>
+<body>
+  <iframe id="lessonFrame" class="frame" title="Biblical Hebrew lesson"></iframe>
+  <noscript>
+    <div class="fallback">
+      <div>
+        <h1>Biblical Hebrew lesson</h1>
+        <p>JavaScript is required to open the lesson player.</p>
+      </div>
+    </div>
+  </noscript>
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      if (!params.has('lesson')) params.set('lesson', '1');
+      params.set('lang', 'hebrew');
+      try { localStorage.setItem('activeLanguage', 'hebrew'); } catch (_) {}
+      document.title = `Lesson ${params.get('lesson')} • Biblical Hebrew`;
+      document.getElementById('lessonFrame').src = `lesson-player.html?${params.toString()}`;
+    })();
+  </script>
+</body>
+</html>
